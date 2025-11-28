@@ -15,7 +15,7 @@ const navItems = [
     label: "Sources",
     path: "/sources",
     dropdown: [
-      { label: "All Sources", path: "/sources-all" },
+      { label: "All Cited Sources", path: "/sources-all" },
       { label: "My Website Pages", path: "/sources-my-website-pages" },
     ],
   },
@@ -24,7 +24,7 @@ const navItems = [
     path: "/competitors",
     dropdown: [
       { label: "Comparisons", path: "/competitors-comparisons" },
-      { label: "Topics", path: "/competitors-topics" },
+      { label: "Topics Matrix", path: "/competitors-topics" },
       { label: "Settings", path: "/competitors-settings" },
     ],
   },
@@ -32,7 +32,9 @@ const navItems = [
     label: "Actions",
     path: "/actions",
     dropdown: [
+      { label: "Executive Summary", path: "/executive-summary" },
       { label: "Recommendations", path: "/recommendations" },
+      { label: "Performance Insights", path: "/performance-insights" },
       { label: "Analyze Page", path: "/analyze-page" },
       { label: "Simulate Changes", path: "/simulate-changes" },
       { label: "Generate Content", path: "/generate-content" },

@@ -11,6 +11,8 @@ import CompetitorsComparisons from "./pages/CompetitorsComparisons";
 import CompetitorsTopics from "./pages/CompetitorsTopics";
 import CompetitorsSettings from "./pages/CompetitorsSettings";
 import Recommendations from "./pages/Recommendations";
+import ExecutiveSummary from "./pages/ExecutiveSummary";
+import PerformanceInsights from "./pages/PerformanceInsights";
 import AnalyzePage from "./pages/AnalyzePage";
 import SimulateChanges from "./pages/SimulateChanges";
 import GenerateContent from "./pages/GenerateContent";
@@ -33,6 +35,8 @@ const App = () => (
           <Route path="/competitors-topics" element={<CompetitorsTopics />} />
           <Route path="/competitors-settings" element={<CompetitorsSettings />} />
           <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/executive-summary" element={<ExecutiveSummary />} />
+          <Route path="/performance-insights" element={<PerformanceInsights />} />
           <Route path="/analyze-page" element={<AnalyzePage />} />
           <Route path="/simulate-changes" element={<SimulateChanges />} />
           <Route path="/generate-content" element={<GenerateContent />} />
