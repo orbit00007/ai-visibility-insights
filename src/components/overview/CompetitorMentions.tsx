@@ -1,5 +1,5 @@
 import { Info } from "lucide-react";
-import { competitorData } from "@/data/analyticsData";
+import { competitorData, getAnalytics } from "@/data/analyticsData";
 
 export const CompetitorMentions = () => {
   return (

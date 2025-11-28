@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { competitorData } from "@/data/analyticsData";
+import { competitorData, getAnalytics } from "@/data/analyticsData";
 
 export const HeroCard = () => {
   const topThree = competitorData.slice(0, 3);

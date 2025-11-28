@@ -1,11 +1,31 @@
-import { analyticsData } from "@/data/analyticsData";
+import { getAnalytics, competitorData } from "@/data/analyticsData";
 
 export const TopTopics = () => {
-  const keywords = analyticsData.analytics[0].analytics.analysis_scope.search_keywords;
+  const analytics = getAnalytics();
+  const keywords = analytics?.analysis_scope?.search_keywords || [];
+  const visibilityTable = analytics?.competitor_visibility_table;
 
-  const topics = [
-    { name: "No-Code Bot Builder", mentions: 2, responses: 24, percentage: 8 },
-  ];
+  // Get Kommunicate's row
+  const kommunicateRow = visibilityTable?.rows?.find(row => row[0] === 'Kommunicate');
+  
+  // Create topics from keywords with actual data
+  const topics = keywords.map((keyword, idx) => {
+    const score = kommunicateRow ? kommunicateRow[idx + 1] as number : 0;
+    // Calculate max score for this keyword
+    let maxScore = 0;
+    visibilityTable?.rows?.forEach(row => {
+      const s = row[idx + 1] as number;
+      if (s > maxScore) maxScore = s;
+    });
+    const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+    
+    return {
+      name: keyword,
+      mentions: score,
+      responses: visibilityTable?.rows?.length || 0,
+      percentage
+    };
+  });
 
   return (
     <div className="bg-card rounded-xl border border-border p-6">
