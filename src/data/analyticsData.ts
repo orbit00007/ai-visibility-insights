@@ -7,49 +7,69 @@ export const analyticsData = rawData;
 export const getAnalytics = () => rawData.analytics[0]?.analytics;
 
 // Get brand name
-export const getBrandName = () => getAnalytics()?.brand_name || 'Kommunicate';
+export const getBrandName = () => getAnalytics()?.brand_name || 'Tesla';
+
+// Get all competitor names from the visibility table
+export const getCompetitorNames = (): string[] => {
+  const analytics = getAnalytics();
+  if (!analytics?.competitor_visibility_table?.rows) return [];
+  return analytics.competitor_visibility_table.rows.map(row => row[0] as string);
+};
+
+// Get keywords from visibility table
+export const getKeywords = (): string[] => {
+  const analytics = getAnalytics();
+  if (!analytics?.competitor_visibility_table?.header) return [];
+  return analytics.competitor_visibility_table.header.slice(1);
+};
 
 // Competitor data derived from competitor_visibility_table with percentiles
 export const competitorData = (() => {
   const analytics = getAnalytics();
   if (!analytics?.competitor_visibility_table?.rows) return [];
   
-  // Calculate total scores for all brands
-  const allBrandScores = analytics.competitor_visibility_table.rows.map(row => {
-    const keyword1Score = row[1] as number;
-    const keyword2Score = row[2] as number;
-    return keyword1Score + keyword2Score;
-  });
-
+  const keywords = getKeywords();
+  
   return analytics.competitor_visibility_table.rows.map(row => {
     const name = row[0] as string;
-    const keyword1Score = row[1] as number;
-    const keyword2Score = row[2] as number;
-    const totalScore = keyword1Score + keyword2Score;
-    const maxScore = Math.max(...allBrandScores);
-    const visibility = Math.round((totalScore / maxScore) * 100);
+    const keywordScores: number[] = [];
+    let totalScore = 0;
+    
+    for (let i = 1; i < row.length; i++) {
+      const score = row[i] as number;
+      keywordScores.push(score);
+      totalScore += score;
+    }
     
     return {
       name,
-      keyword1Score,
-      keyword2Score,
-      totalScore,
-      visibility
+      keywordScores,
+      totalScore
     };
   }).sort((a, b) => b.totalScore - a.totalScore);
 })();
+
+// Calculate visibility for progress bars (relative to max)
+export const getCompetitorVisibility = () => {
+  const maxScore = Math.max(...competitorData.map(c => c.totalScore));
+  return competitorData.map(c => ({
+    ...c,
+    visibility: maxScore > 0 ? Math.round((c.totalScore / maxScore) * 100) : 0
+  }));
+};
 
 // Get all brand total scores for percentile calculation
 export const getAllBrandVisibilityScores = (): number[] => {
   return competitorData.map(c => c.totalScore);
 };
 
-// Calculate Kommunicate's visibility percentile
+// Calculate Brand's visibility percentile
 export const getVisibilityPercentile = (): { percentile: number; tier: string; totalBrands: number } => {
-  const kommunicate = competitorData.find(c => c.name === 'Kommunicate');
+  const brandName = getBrandName();
+  const brand = competitorData.find(c => c.name === brandName);
   const allScores = getAllBrandVisibilityScores();
-  const percentile = kommunicate 
-    ? calculatePercentile(kommunicate.totalScore, allScores)
+  const percentile = brand 
+    ? calculatePercentile(brand.totalScore, allScores)
     : 0;
   return {
     percentile,
@@ -63,83 +83,96 @@ export const getBrandMentionCounts = (): Record<string, number> => {
   const analytics = getAnalytics();
   if (!analytics?.sources_and_content_impact?.rows) return {};
   
-  const brands = ['Tidio', 'ManyChat', 'Landbot', 'Ada', 'Zendesk', 'Kommunicate'];
+  const header = analytics.sources_and_content_impact.header;
   const mentionCounts: Record<string, number> = {};
   
-  brands.forEach((brand, idx) => {
-    // Each brand has 3 columns: presence, mentions count, score
-    // Mentions column index: 2 + (idx * 3) + 1 = index for mentions
-    const mentionsColumnIndex = 2 + (idx * 3);
+  // Find all brand mention columns (columns that end with "Mentions")
+  const mentionColumns: { brand: string; index: number }[] = [];
+  header.forEach((col: string, idx: number) => {
+    if (col.endsWith(' Mentions')) {
+      const brand = col.replace(' Mentions', '');
+      mentionColumns.push({ brand, index: idx });
+    }
+  });
+  
+  // Sum mentions for each brand across all sources
+  mentionColumns.forEach(({ brand, index }) => {
     let totalMentions = 0;
-    
     analytics.sources_and_content_impact.rows.forEach((row: any[]) => {
-      const mentions = row[mentionsColumnIndex] as number;
+      const mentions = row[index] as number;
       totalMentions += mentions;
     });
-    
     mentionCounts[brand] = totalMentions;
   });
   
   return mentionCounts;
 };
 
-// Calculate Kommunicate's mentions percentile
+// Calculate Brand's mentions percentile
 export const getMentionsPercentile = (): { 
   percentile: number; 
   tier: string; 
   totalBrands: number;
   topBrandMentions: number;
-  kommunicateMentions: number;
+  brandMentions: number;
 } => {
   const mentionCounts = getBrandMentionCounts();
+  const brandName = getBrandName();
   const allMentions = Object.values(mentionCounts);
-  const kommunicateMentions = mentionCounts['Kommunicate'] || 0;
+  const brandMentions = mentionCounts[brandName] || 0;
   const topBrandMentions = Math.max(...allMentions);
-  const percentile = calculatePercentile(kommunicateMentions, allMentions);
+  const percentile = calculatePercentile(brandMentions, allMentions);
   
   return {
     percentile,
     tier: getTierFromPercentile(percentile),
     totalBrands: Object.keys(mentionCounts).length,
     topBrandMentions,
-    kommunicateMentions
+    brandMentions
   };
 };
 
-// Sources data derived from sources_and_content_impact
-export const sourcesData = (() => {
+// Get sources data with dynamic brand columns
+export const getSourcesData = () => {
   const analytics = getAnalytics();
   if (!analytics?.sources_and_content_impact?.rows) return [];
   
-  return analytics.sources_and_content_impact.rows.map((row: any[]) => ({
-    name: row[0] as string,
-    tidioPresence: row[1] as string,
-    tidioMentions: row[2] as number,
-    tidioScore: row[3] as string,
-    manyChatPresence: row[4] as string,
-    manyChatMentions: row[5] as number,
-    manyChatScore: row[6] as string,
-    landbotPresence: row[7] as string,
-    landbotMentions: row[8] as number,
-    landbotScore: row[9] as string,
-    adaPresence: row[10] as string,
-    adaMentions: row[11] as number,
-    adaScore: row[12] as string,
-    zendeskPresence: row[13] as string,
-    zendeskMentions: row[14] as number,
-    zendeskScore: row[15] as string,
-    kommunicatePresence: row[16] as string,
-    kommunicateMentions: row[17] as number,
-    kommunicateScore: row[18] as string,
-    citedByLLMs: row[19] as string,
-    pagesUsed: row[20] as string[]
-  }));
-})();
+  const header = analytics.sources_and_content_impact.header;
+  const brands = getCompetitorNames();
+  
+  return analytics.sources_and_content_impact.rows.map((row: any[]) => {
+    const sourceData: any = {
+      name: row[0] as string,
+      citedByLLMs: row[header.indexOf('Cited By LLMs')] as string,
+      pagesUsed: row[header.indexOf('pages_used')] as string[]
+    };
+    
+    // Add brand-specific data
+    brands.forEach(brand => {
+      const presenceIdx = header.indexOf(brand);
+      const mentionsIdx = header.indexOf(`${brand} Mentions`);
+      const scoreIdx = header.indexOf(`${brand} Mention Score`);
+      
+      if (presenceIdx !== -1) {
+        sourceData[`${brand}Presence`] = row[presenceIdx];
+      }
+      if (mentionsIdx !== -1) {
+        sourceData[`${brand}Mentions`] = row[mentionsIdx];
+      }
+      if (scoreIdx !== -1) {
+        sourceData[`${brand}Score`] = row[scoreIdx];
+      }
+    });
+    
+    return sourceData;
+  });
+};
 
-// Get depth notes for Kommunicate
+// Get depth notes for the brand
 export const getDepthNotes = () => {
   const analytics = getAnalytics();
-  return analytics?.sources_and_content_impact?.depth_notes?.Kommunicate || {};
+  const brandName = getBrandName();
+  return analytics?.sources_and_content_impact?.depth_notes?.[brandName] || {};
 };
 
 // LLM-wise data
@@ -217,4 +250,11 @@ export const getAnalysisDate = () => {
     day: 'numeric',
     year: 'numeric'
   }) : '';
+};
+
+// Get total mentions across all sources for the primary brand
+export const getPrimaryBrandTotalMentions = (): number => {
+  const mentionCounts = getBrandMentionCounts();
+  const brandName = getBrandName();
+  return mentionCounts[brandName] || 0;
 };

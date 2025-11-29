@@ -1,14 +1,16 @@
 import { Layout } from "@/components/layout/Layout";
-import { getAnalytics } from "@/data/analyticsData";
+import { getAnalytics, getBrandName, getDepthNotes } from "@/data/analyticsData";
+import { TierBadge } from "@/components/ui/TierBadge";
 import { Globe, AlertCircle, CheckCircle } from "lucide-react";
 
 const SourcesMyWebsitePages = () => {
   const analytics = getAnalytics();
+  const brandName = getBrandName();
   const brandWebsite = analytics?.brand_website || 'Not specified';
-  const depthNotes = analytics?.sources_and_content_impact?.depth_notes?.Kommunicate;
+  const depthNotes = getDepthNotes();
 
   // Extract pages from depth notes
-  const brandPagesInfo = depthNotes?.["Brand Pages & Owned Content"];
+  const brandPagesInfo = depthNotes?.["Brand Pages"];
   const pagesUsed = brandPagesInfo?.pages_used?.filter((p: string) => p !== 'Absent') || [];
 
   return (
@@ -33,7 +35,7 @@ const SourcesMyWebsitePages = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-card rounded-xl border border-border p-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-green-400" />
+              <CheckCircle className="w-5 h-5 text-green-500" />
               <span className="text-sm text-muted-foreground">Pages Cited by LLMs</span>
             </div>
             <span className="text-3xl font-bold text-foreground">{pagesUsed.length}</span>
@@ -44,15 +46,15 @@ const SourcesMyWebsitePages = () => {
               <Globe className="w-5 h-5 text-primary" />
               <span className="text-sm text-muted-foreground">Brand Content Status</span>
             </div>
-            <span className="text-xl font-bold text-green-400">Active</span>
+            <TierBadge tier={pagesUsed.length > 0 ? 'High' : 'Low'} className="text-base" />
           </div>
 
           <div className="bg-card rounded-xl border border-border p-6">
             <div className="flex items-center gap-2 mb-2">
-              <AlertCircle className="w-5 h-5 text-yellow-400" />
+              <AlertCircle className="w-5 h-5 text-amber-500" />
               <span className="text-sm text-muted-foreground">Optimization Status</span>
             </div>
-            <span className="text-xl font-bold text-yellow-400">Needs Improvement</span>
+            <TierBadge tier="Medium" className="text-base" />
           </div>
         </div>
 
@@ -75,9 +77,7 @@ const SourcesMyWebsitePages = () => {
                     <Globe className="w-4 h-4 text-primary" />
                     <span className="text-foreground">{page}</span>
                   </div>
-                  <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-sm">
-                    Cited
-                  </span>
+                  <TierBadge tier="Yes" />
                 </div>
               ))}
             </div>
@@ -94,11 +94,7 @@ const SourcesMyWebsitePages = () => {
               <div key={category} className="p-4 bg-muted/30 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-foreground">{category}</span>
-                  <span className={`px-2 py-1 rounded text-sm ${
-                    data.pages_used[0] !== 'Absent' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                  }`}>
-                    {data.pages_used[0] !== 'Absent' ? 'Present' : 'Absent'}
-                  </span>
+                  <TierBadge tier={data.pages_used?.[0] !== 'Absent' ? 'Yes' : 'No'} />
                 </div>
                 <p className="text-sm text-muted-foreground">{data.insight}</p>
               </div>

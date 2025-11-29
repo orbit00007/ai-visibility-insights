@@ -10,7 +10,6 @@ import {
   getMentionsPercentile, 
   getSentiment,
   llmData,
-  competitorSentiment,
   getBrandName
 } from "@/data/analyticsData";
 import { Info, TrendingUp, MessageSquare, ThumbsUp } from "lucide-react";
@@ -19,7 +18,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TOOLTIP_CONTENT } from "@/data/formulas";
 
 const Overview = () => {
   const visibilityData = getVisibilityPercentile();
@@ -43,13 +41,21 @@ const Overview = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* AI Visibility Card */}
           <div className="bg-card rounded-xl border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium text-foreground">AI Visibility</span>
               </div>
-              <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Percentile rank based on visibility score compared to all competitors.</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <PercentileGauge
               percentile={visibilityData.percentile}
@@ -61,13 +67,21 @@ const Overview = () => {
             </div>
           </div>
 
+          {/* Brand Mentions Card */}
           <div className="bg-card rounded-xl border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium text-foreground">Brand Mentions</span>
               </div>
-              <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Percentile rank based on raw mention count across all sources.</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <PercentileGauge
               percentile={mentionsData.percentile}
@@ -79,6 +93,7 @@ const Overview = () => {
             </div>
           </div>
 
+          {/* Sentiment Card */}
           <div className="bg-card rounded-xl border border-border p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -96,23 +111,24 @@ const Overview = () => {
           </div>
         </div>
 
+        {/* LLM Performance */}
         <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Platform-wise Brand Performance</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">LLM-wise Brand Performance</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(llmData).map(([platform, data]: [string, any]) => (
-              <div key={platform} className="bg-muted/30 rounded-lg p-4">
+              <div key={platform} className="bg-muted/30 rounded-lg p-4 border border-border">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-foreground capitalize">{platform}</span>
+                  <span className="font-semibold text-foreground capitalize text-lg">{platform}</span>
                   <span className="text-2xl font-bold text-primary">{data.brand_mentions_count}</span>
                 </div>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <div className="flex justify-between">
                     <span>Queries with brand:</span>
-                    <span className="text-foreground">{data.queries_with_brand}</span>
+                    <span className="text-foreground font-medium">{data.queries_with_brand}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Average rank:</span>
-                    <span className="text-foreground">#{data.average_brand_rank}</span>
+                    <span className="text-foreground font-medium">#{data.average_brand_rank}</span>
                   </div>
                 </div>
               </div>
@@ -128,34 +144,6 @@ const Overview = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TopTopics />
           <TopCitedSources />
-        </div>
-
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Competitor Sentiment Analysis</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Brand</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Summary</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Outlook</th>
-                </tr>
-              </thead>
-              <tbody>
-                {competitorSentiment.map((item, index) => (
-                  <tr key={index} className="border-b border-border/50 hover:bg-muted/20">
-                    <td className={`py-3 px-4 font-medium ${item.brand === brandName ? 'text-primary' : 'text-foreground'}`}>
-                      {item.brand}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{item.summary}</td>
-                    <td className="py-3 px-4">
-                      <TierBadge tier={item.outlook} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
     </Layout>

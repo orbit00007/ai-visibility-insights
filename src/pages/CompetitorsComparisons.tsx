@@ -1,18 +1,23 @@
 import { Layout } from "@/components/layout/Layout";
-import { getAnalytics, competitorData, competitorSentiment } from "@/data/analyticsData";
+import { getAnalytics, competitorData, competitorSentiment, getCompetitorVisibility, getBrandName, getKeywords } from "@/data/analyticsData";
+import { TierBadge } from "@/components/ui/TierBadge";
 import { useState } from "react";
-import { ArrowUpDown } from "lucide-react";
 
 const CompetitorsComparisons = () => {
   const analytics = getAnalytics();
   const visibilityTable = analytics?.competitor_visibility_table;
-  const [selectedCompetitor, setSelectedCompetitor] = useState<string>('Tidio');
+  const brandName = getBrandName();
+  const keywords = getKeywords();
+  const competitorVisibility = getCompetitorVisibility();
+  
+  const otherCompetitors = competitorData.filter(c => c.name !== brandName);
+  const [selectedCompetitor, setSelectedCompetitor] = useState<string>(otherCompetitors[0]?.name || '');
 
-  // Get Kommunicate data
-  const kommunicate = competitorData.find(c => c.name === 'Kommunicate');
-  const competitor = competitorData.find(c => c.name === selectedCompetitor);
+  // Get brand data
+  const brand = competitorVisibility.find(c => c.name === brandName);
+  const competitor = competitorVisibility.find(c => c.name === selectedCompetitor);
 
-  const kommunicateSentiment = competitorSentiment.find(s => s.brand === 'Kommunicate');
+  const brandSentiment = competitorSentiment.find(s => s.brand === brandName);
   const competitorSentimentData = competitorSentiment.find(s => s.brand === selectedCompetitor);
 
   return (
@@ -22,13 +27,13 @@ const CompetitorsComparisons = () => {
 
         {/* Competitor Selector */}
         <div className="flex items-center gap-4">
-          <span className="text-muted-foreground">Compare Kommunicate with:</span>
+          <span className="text-muted-foreground">Compare {brandName} with:</span>
           <select
             value={selectedCompetitor}
             onChange={(e) => setSelectedCompetitor(e.target.value)}
             className="bg-muted/30 border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            {competitorData.filter(c => c.name !== 'Kommunicate').map(c => (
+            {otherCompetitors.map(c => (
               <option key={c.name} value={c.name}>{c.name}</option>
             ))}
           </select>
@@ -36,39 +41,33 @@ const CompetitorsComparisons = () => {
 
         {/* Side by Side Comparison */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Kommunicate */}
-          <div className="bg-card rounded-xl border border-primary p-6">
+          {/* Primary Brand */}
+          <div className="bg-card rounded-xl border-2 border-primary p-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                K
+                {brandName[0]}
               </div>
-              <h3 className="text-xl font-bold text-primary">Kommunicate</h3>
+              <h3 className="text-xl font-bold text-primary">{brandName}</h3>
             </div>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Total Score</span>
-                <span className="text-2xl font-bold text-foreground">{kommunicate?.totalScore || 0}</span>
+                <span className="text-2xl font-bold text-foreground">{brand?.totalScore || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Visibility %</span>
-                <span className="text-xl font-semibold text-foreground">{kommunicate?.visibility || 0}%</span>
+                <span className="text-xl font-semibold text-foreground">{brand?.visibility || 0}%</span>
               </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-primary rounded-full transition-all duration-500"
-                  style={{ width: `${kommunicate?.visibility || 0}%` }}
+                  style={{ width: `${brand?.visibility || 0}%` }}
                 />
               </div>
               <div className="pt-4 border-t border-border">
                 <span className="text-sm text-muted-foreground">Sentiment:</span>
-                <span className={`ml-2 px-2 py-1 rounded text-sm ${
-                  kommunicateSentiment?.outlook === 'Positive' ? 'bg-green-500/20 text-green-400' :
-                  kommunicateSentiment?.outlook === 'Negative' ? 'bg-red-500/20 text-red-400' :
-                  'bg-yellow-500/20 text-yellow-400'
-                }`}>
-                  {kommunicateSentiment?.outlook || 'N/A'}
-                </span>
-                <p className="mt-2 text-sm text-muted-foreground">{kommunicateSentiment?.summary}</p>
+                <TierBadge tier={brandSentiment?.outlook || 'N/A'} className="ml-2" />
+                <p className="mt-2 text-sm text-muted-foreground">{brandSentiment?.summary}</p>
               </div>
             </div>
           </div>
@@ -92,19 +91,13 @@ const CompetitorsComparisons = () => {
               </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-muted-foreground rounded-full transition-all duration-500"
+                  className="h-full bg-slate-400 rounded-full transition-all duration-500"
                   style={{ width: `${competitor?.visibility || 0}%` }}
                 />
               </div>
               <div className="pt-4 border-t border-border">
                 <span className="text-sm text-muted-foreground">Sentiment:</span>
-                <span className={`ml-2 px-2 py-1 rounded text-sm ${
-                  competitorSentimentData?.outlook === 'Positive' ? 'bg-green-500/20 text-green-400' :
-                  competitorSentimentData?.outlook === 'Negative' ? 'bg-red-500/20 text-red-400' :
-                  'bg-yellow-500/20 text-yellow-400'
-                }`}>
-                  {competitorSentimentData?.outlook || 'N/A'}
-                </span>
+                <TierBadge tier={competitorSentimentData?.outlook || 'N/A'} className="ml-2" />
                 <p className="mt-2 text-sm text-muted-foreground">{competitorSentimentData?.summary}</p>
               </div>
             </div>
@@ -117,36 +110,36 @@ const CompetitorsComparisons = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Keyword</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-primary">Kommunicate</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">{selectedCompetitor}</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Difference</th>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Keyword</th>
+                  <th className="text-center py-3 px-4 text-xs font-semibold text-primary uppercase tracking-wider">{brandName}</th>
+                  <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{selectedCompetitor}</th>
+                  <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Difference</th>
                 </tr>
               </thead>
               <tbody>
-                {visibilityTable?.header?.slice(1).map((keyword, index) => {
-                  const kommunicateRow = visibilityTable.rows.find(r => r[0] === 'Kommunicate');
-                  const competitorRow = visibilityTable.rows.find(r => r[0] === selectedCompetitor);
+                {keywords.map((keyword, index) => {
+                  const brandRow = visibilityTable?.rows?.find(r => r[0] === brandName);
+                  const competitorRow = visibilityTable?.rows?.find(r => r[0] === selectedCompetitor);
                   
-                  const kScore = kommunicateRow ? kommunicateRow[index + 1] as number : 0;
+                  const bScore = brandRow ? brandRow[index + 1] as number : 0;
                   const cScore = competitorRow ? competitorRow[index + 1] as number : 0;
-                  const diff = kScore - cScore;
+                  const diff = bScore - cScore;
 
                   return (
                     <tr key={keyword} className="border-b border-border/50 hover:bg-muted/20">
                       <td className="py-3 px-4 text-foreground">{keyword}</td>
                       <td className="py-3 px-4 text-center">
-                        <span className="px-2 py-1 bg-primary/20 text-primary rounded">{kScore}</span>
+                        <span className="px-3 py-1.5 bg-primary/20 text-primary rounded font-semibold">{bScore}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="px-2 py-1 bg-muted text-foreground rounded">{cScore}</span>
+                        <span className="px-3 py-1.5 bg-muted text-foreground rounded font-semibold">{cScore}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`px-2 py-1 rounded ${
-                          diff > 0 ? 'bg-green-500/20 text-green-400' :
-                          diff < 0 ? 'bg-red-500/20 text-red-400' :
-                          'bg-muted text-muted-foreground'
+                        <span className={`px-3 py-1.5 rounded font-semibold ${
+                          diff > 0 ? 'bg-green-500 text-white' :
+                          diff < 0 ? 'bg-red-500 text-white' :
+                          'bg-slate-500 text-white'
                         }`}>
                           {diff > 0 ? '+' : ''}{diff}
                         </span>
@@ -165,29 +158,36 @@ const CompetitorsComparisons = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Brand</th>
-                  {visibilityTable?.header?.slice(1).map(keyword => (
-                    <th key={keyword} className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">{keyword}</th>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Brand</th>
+                  {keywords.map(keyword => (
+                    <th key={keyword} className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{keyword}</th>
                   ))}
-                  <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Total</th>
+                  <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total</th>
                 </tr>
               </thead>
               <tbody>
-                {competitorData.map(c => (
-                  <tr key={c.name} className={`border-b border-border/50 hover:bg-muted/20 ${c.name === 'Kommunicate' ? 'bg-primary/5' : ''}`}>
-                    <td className={`py-3 px-4 font-medium ${c.name === 'Kommunicate' ? 'text-primary' : 'text-foreground'}`}>
-                      {c.name}
-                    </td>
-                    <td className="py-3 px-4 text-center text-foreground">{c.keyword1Score}</td>
-                    <td className="py-3 px-4 text-center text-foreground">{c.keyword2Score}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`px-2 py-1 rounded ${c.name === 'Kommunicate' ? 'bg-primary/20 text-primary' : 'bg-muted text-foreground'}`}>
-                        {c.totalScore}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {competitorData.map(c => {
+                  const isPrimaryBrand = c.name === brandName;
+                  return (
+                    <tr key={c.name} className={`border-b border-border/50 hover:bg-muted/20 ${isPrimaryBrand ? 'bg-primary/5' : ''}`}>
+                      <td className={`py-3 px-4 font-medium ${isPrimaryBrand ? 'text-primary' : 'text-foreground'}`}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${isPrimaryBrand ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
+                          {c.name}
+                        </div>
+                      </td>
+                      {c.keywordScores.map((score, idx) => (
+                        <td key={idx} className="py-3 px-4 text-center text-foreground">{score}</td>
+                      ))}
+                      <td className="py-3 px-4 text-center">
+                        <span className={`px-3 py-1.5 rounded font-semibold ${isPrimaryBrand ? 'bg-primary text-white' : 'bg-muted text-foreground'}`}>
+                          {c.totalScore}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

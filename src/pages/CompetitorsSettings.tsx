@@ -1,10 +1,14 @@
 import { Layout } from "@/components/layout/Layout";
-import { competitorData, competitorSentiment } from "@/data/analyticsData";
+import { competitorData, competitorSentiment, getCompetitorVisibility, getBrandName, getModelName } from "@/data/analyticsData";
+import { TierBadge } from "@/components/ui/TierBadge";
 import { Settings, Users, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 const CompetitorsSettings = () => {
-  const [competitors, setCompetitors] = useState(competitorData.filter(c => c.name !== 'Kommunicate'));
+  const brandName = getBrandName();
+  const modelName = getModelName();
+  const competitorVisibility = getCompetitorVisibility();
+  const [competitors, setCompetitors] = useState(competitorVisibility.filter(c => c.name !== brandName));
 
   return (
     <Layout>
@@ -33,7 +37,7 @@ const CompetitorsSettings = () => {
               <Settings className="w-5 h-5 text-primary" />
               <span className="text-sm text-muted-foreground">Analysis Model</span>
             </div>
-            <span className="text-xl font-bold text-foreground">OpenAI + Gemini</span>
+            <span className="text-xl font-bold text-foreground capitalize">{modelName || 'OpenAI + Gemini'}</span>
           </div>
         </div>
 
@@ -44,12 +48,12 @@ const CompetitorsSettings = () => {
           </div>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Competitor</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Total Score</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Visibility %</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Sentiment</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Actions</th>
+              <tr className="border-b border-border bg-muted/20">
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Competitor</th>
+                <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Score</th>
+                <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Visibility %</th>
+                <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sentiment</th>
+                <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -67,24 +71,18 @@ const CompetitorsSettings = () => {
                       </div>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="px-2 py-1 bg-muted rounded text-foreground">{competitor.totalScore}</span>
+                      <span className="px-3 py-1.5 bg-muted rounded font-semibold text-foreground">{competitor.totalScore}</span>
                     </td>
-                    <td className="py-3 px-4 text-center text-foreground">{competitor.visibility}%</td>
+                    <td className="py-3 px-4 text-center text-foreground font-semibold">{competitor.visibility}%</td>
                     <td className="py-3 px-4 text-center">
-                      <span className={`px-2 py-1 rounded text-sm ${
-                        sentiment?.outlook === 'Positive' ? 'bg-green-500/20 text-green-400' :
-                        sentiment?.outlook === 'Negative' ? 'bg-red-500/20 text-red-400' :
-                        'bg-yellow-500/20 text-yellow-400'
-                      }`}>
-                        {sentiment?.outlook || 'N/A'}
-                      </span>
+                      <TierBadge tier={sentiment?.outlook || 'N/A'} />
                     </td>
                     <td className="py-3 px-4 text-center">
                       <button 
                         className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
                         onClick={() => setCompetitors(competitors.filter(c => c.name !== competitor.name))}
                       >
-                        <Trash2 className="w-4 h-4 text-red-400" />
+                        <Trash2 className="w-4 h-4 text-red-500" />
                       </button>
                     </td>
                   </tr>
@@ -100,7 +98,7 @@ const CompetitorsSettings = () => {
           <p className="text-muted-foreground text-sm">
             Competitors are automatically detected based on the keywords analyzed. The system identifies brands 
             that appear in AI-generated responses for your target keywords and tracks their visibility scores 
-            across different AI platforms (OpenAI, Gemini).
+            across different AI platforms ({modelName || 'OpenAI, Gemini'}).
           </p>
         </div>
       </div>
