@@ -1,18 +1,21 @@
 import { Layout } from "@/components/layout/Layout";
-import { getAnalytics, sourcesData } from "@/data/analyticsData";
+import { getAnalytics, getSourcesData, getBrandName, getDepthNotes } from "@/data/analyticsData";
+import { TierBadge } from "@/components/ui/TierBadge";
 import { ChevronDown, ChevronRight, Globe, FileText } from "lucide-react";
 import { useState } from "react";
 
 const SourcesAll = () => {
   const analytics = getAnalytics();
-  const sourcesImpact = analytics?.sources_and_content_impact;
-  const depthNotes = sourcesImpact?.depth_notes?.Kommunicate || {};
+  const brandName = getBrandName();
+  const sourcesData = getSourcesData();
+  const depthNotes = getDepthNotes();
   const [expandedSource, setExpandedSource] = useState<string | null>(null);
 
   // Calculate totals
   const totalSources = sourcesData.length;
-  const sourcesWithMentions = sourcesData.filter(s => s.kommunicateMentions > 0).length;
-  const totalMentions = sourcesData.reduce((acc, s) => acc + s.kommunicateMentions, 0);
+  const brandMentionsKey = `${brandName}Mentions`;
+  const sourcesWithMentions = sourcesData.filter(s => (s[brandMentionsKey] || 0) > 0).length;
+  const totalMentions = sourcesData.reduce((acc, s) => acc + (s[brandMentionsKey] || 0), 0);
 
   return (
     <Layout>
@@ -51,17 +54,19 @@ const SourcesAll = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground w-8"></th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Source Category</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Mentions</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Score</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Cited by LLMs</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-8"></th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Source Category</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Presence</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mentions</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cited by LLMs</th>
               </tr>
             </thead>
             <tbody>
               {sourcesData.map((source) => {
                 const isExpanded = expandedSource === source.name;
                 const notes = depthNotes[source.name as keyof typeof depthNotes];
+                const presence = source[`${brandName}Presence`];
+                const mentions = source[`${brandName}Mentions`] || 0;
 
                 return (
                   <>
@@ -78,22 +83,12 @@ const SourcesAll = () => {
                         )}
                       </td>
                       <td className="py-3 px-4 font-medium text-foreground">{source.name}</td>
-                      <td className="py-3 px-4 text-foreground">{source.kommunicateMentions}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          source.kommunicateScore === 'High' ? 'bg-green-500/20 text-green-400' :
-                          source.kommunicateScore === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'
-                        }`}>
-                          {source.kommunicateScore}
-                        </span>
+                        <TierBadge tier={presence || 'Absent'} />
                       </td>
+                      <td className="py-3 px-4 text-foreground font-semibold">{mentions}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          source.citedByLLMs === 'Yes' ? 'bg-green-500/20 text-green-400' : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {source.citedByLLMs}
-                        </span>
+                        <TierBadge tier={source.citedByLLMs} />
                       </td>
                     </tr>
                     {isExpanded && (
@@ -110,7 +105,7 @@ const SourcesAll = () => {
                                   <h4 className="font-medium text-foreground mb-2">Pages Used</h4>
                                   <div className="flex flex-wrap gap-2">
                                     {((notes as any).pages_used || []).map((page: string, idx: number) => (
-                                      <span key={idx} className="px-3 py-1 bg-card border border-border rounded-full text-sm text-foreground">
+                                      <span key={idx} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
                                         {page}
                                       </span>
                                     ))}
@@ -120,16 +115,18 @@ const SourcesAll = () => {
                             ) : (
                               <p className="text-muted-foreground">No detailed notes available for this source.</p>
                             )}
-                            <div>
-                              <h4 className="font-medium text-foreground mb-2">Source Types</h4>
-                              <div className="flex flex-wrap gap-2">
-                                {source.pagesUsed.map((page, idx) => (
-                                  <span key={idx} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    {page}
-                                  </span>
-                                ))}
+                            {source.pagesUsed && source.pagesUsed[0] !== 'Absent' && (
+                              <div>
+                                <h4 className="font-medium text-foreground mb-2">Source Types</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {source.pagesUsed.map((page, idx) => (
+                                    <span key={idx} className="px-3 py-1 bg-muted text-foreground rounded-full text-sm">
+                                      {page}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                         </td>
                       </tr>
