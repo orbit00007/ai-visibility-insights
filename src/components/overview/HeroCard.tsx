@@ -1,15 +1,16 @@
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { competitorData, getBrandName } from "@/data/analyticsData";
+import { getCompetitorVisibility, getBrandName } from "@/data/analyticsData";
 
 export const HeroCard = () => {
   const brandName = getBrandName();
-  const topTwo = competitorData.slice(0, 2);
-  const kommunicate = competitorData.find(c => c.name === brandName);
+  const competitorVisibility = getCompetitorVisibility();
+  const topTwo = competitorVisibility.filter(c => c.name !== brandName).slice(0, 2);
+  const brand = competitorVisibility.find(c => c.name === brandName);
 
   const displayData = [
-    ...topTwo.map(c => ({ name: c.name, visibility: c.visibility, isKommunicate: false })),
-    { name: brandName, visibility: kommunicate?.visibility || 0, isKommunicate: true }
+    ...topTwo.map(c => ({ name: c.name, visibility: c.visibility, isBrand: false })),
+    { name: brandName, visibility: brand?.visibility || 0, isBrand: true }
   ];
 
   return (
@@ -27,20 +28,20 @@ export const HeroCard = () => {
           <span></span>
         </div>
 
-        {displayData.map((brand, index) => (
-          <div key={brand.name} className="grid grid-cols-[1fr_2fr_auto] gap-4 items-center">
+        {displayData.map((item, index) => (
+          <div key={item.name} className="grid grid-cols-[1fr_2fr_auto] gap-4 items-center">
             <div className="flex items-center gap-2">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                brand.isKommunicate ? "bg-amber-400 text-amber-900" : "bg-white/20"
+                item.isBrand ? "bg-amber-400 text-amber-900" : "bg-white/20"
               }`}>
                 {index === 0 && "🏆"}{index === 1 && "🥈"}{index === 2 && "🔶"}
               </div>
-              <span className={brand.isKommunicate ? "text-amber-400 font-medium" : ""}>{brand.name}</span>
+              <span className={item.isBrand ? "text-amber-400 font-medium" : ""}>{item.name}</span>
             </div>
             <div className="relative h-3 bg-white/20 rounded-full overflow-hidden">
-              <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${brand.isKommunicate ? "bg-white/40" : "bg-primary"}`} style={{ width: `${brand.visibility}%` }} />
+              <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${item.isBrand ? "bg-white/40" : "bg-primary"}`} style={{ width: `${item.visibility}%` }} />
             </div>
-            <span className="text-sm font-medium w-16 text-right">{brand.visibility}%</span>
+            <span className="text-sm font-medium w-16 text-right">{item.visibility}%</span>
           </div>
         ))}
       </div>
