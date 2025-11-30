@@ -63,18 +63,43 @@ export const getAllBrandVisibilityScores = (): number[] => {
   return competitorData.map(c => c.totalScore);
 };
 
-// Calculate Brand's visibility percentile
-export const getVisibilityPercentile = (): { percentile: number; tier: string; totalBrands: number } => {
+// Get AI Visibility data directly from the JSON (weighted_mentions_total, tier, etc.)
+export const getAIVisibilityMetrics = (): { 
+  score: number; 
+  tier: string; 
+  percentile: number;
+  totalBrands: number;
+  breakdown: { top_two_mentions: number; top_five_mentions: number; later_mentions: number; calculation: string } | null;
+  explanation: string;
+} => {
+  const analytics = getAnalytics();
+  const aiVisibility = analytics?.ai_visibility;
+  
+  // Calculate percentile based on competitor visibility scores
   const brandName = getBrandName();
   const brand = competitorData.find(c => c.name === brandName);
   const allScores = getAllBrandVisibilityScores();
   const percentile = brand 
     ? calculatePercentile(brand.totalScore, allScores)
     : 0;
+  
   return {
+    score: aiVisibility?.weighted_mentions_total || 0,
+    tier: getTierFromPercentile(percentile), // Calculate tier from percentile, not from data
     percentile,
-    tier: getTierFromPercentile(percentile),
-    totalBrands: competitorData.length
+    totalBrands: competitorData.length,
+    breakdown: aiVisibility?.breakdown || null,
+    explanation: aiVisibility?.explanation || ''
+  };
+};
+
+// Legacy function for backward compatibility
+export const getVisibilityPercentile = (): { percentile: number; tier: string; totalBrands: number } => {
+  const metrics = getAIVisibilityMetrics();
+  return {
+    percentile: metrics.percentile,
+    tier: metrics.tier,
+    totalBrands: metrics.totalBrands
   };
 };
 
@@ -108,28 +133,46 @@ export const getBrandMentionCounts = (): Record<string, number> => {
   return mentionCounts;
 };
 
-// Calculate Brand's mentions percentile
+// Calculate Brand's mentions percentile from sources_and_content_impact
 export const getMentionsPercentile = (): { 
   percentile: number; 
   tier: string; 
   totalBrands: number;
   topBrandMentions: number;
   brandMentions: number;
+  allBrandMentions: Record<string, number>;
 } => {
   const mentionCounts = getBrandMentionCounts();
   const brandName = getBrandName();
   const allMentions = Object.values(mentionCounts);
   const brandMentions = mentionCounts[brandName] || 0;
-  const topBrandMentions = Math.max(...allMentions);
-  const percentile = calculatePercentile(brandMentions, allMentions);
+  const topBrandMentions = allMentions.length > 0 ? Math.max(...allMentions) : 0;
+  const percentile = allMentions.length > 0 ? calculatePercentile(brandMentions, allMentions) : 0;
   
   return {
     percentile,
-    tier: getTierFromPercentile(percentile),
+    tier: getTierFromPercentile(percentile), // High ≥80, Medium 40-79, Low <40
     totalBrands: Object.keys(mentionCounts).length,
     topBrandMentions,
-    brandMentions
+    brandMentions,
+    allBrandMentions: mentionCounts
   };
+};
+
+// Get all brands with their mention counts and calculated tiers
+export const getAllBrandMentionsWithTiers = (): Array<{ brand: string; mentions: number; percentile: number; tier: string }> => {
+  const mentionCounts = getBrandMentionCounts();
+  const allMentions = Object.values(mentionCounts);
+  
+  return Object.entries(mentionCounts).map(([brand, mentions]) => {
+    const percentile = calculatePercentile(mentions, allMentions);
+    return {
+      brand,
+      mentions,
+      percentile,
+      tier: getTierFromPercentile(percentile)
+    };
+  }).sort((a, b) => b.mentions - a.mentions);
 };
 
 // Get sources data with dynamic brand columns
