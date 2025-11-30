@@ -4,11 +4,11 @@ import { Link } from "react-router-dom";
 export const TopTopics = () => {
   const keywords = getSearchKeywords();
   const brandName = getBrandName();
-  const kommunicate = competitorData.find(c => c.name === brandName);
+  const brand = competitorData.find(c => c.name === brandName);
 
   const topicsData = keywords.map((keyword, idx) => {
-    const score = idx === 0 ? kommunicate?.keyword1Score || 0 : kommunicate?.keyword2Score || 0;
-    const maxScore = Math.max(...competitorData.map(c => idx === 0 ? c.keyword1Score : c.keyword2Score));
+    const score = brand?.keywordScores?.[idx] || 0;
+    const maxScore = Math.max(...competitorData.map(c => c.keywordScores?.[idx] || 0));
     const visibility = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
     return { name: keyword, mentions: score, responses: 4, visibility };
   });
