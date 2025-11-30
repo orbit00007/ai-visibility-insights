@@ -6,7 +6,7 @@ import { TopCitedSources } from "@/components/overview/TopCitedSources";
 import { PercentileGauge } from "@/components/ui/PercentileGauge";
 import { TierBadge } from "@/components/ui/TierBadge";
 import { 
-  getVisibilityPercentile, 
+  getAIVisibilityMetrics, 
   getMentionsPercentile, 
   getSentiment,
   llmData,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 
 const Overview = () => {
-  const visibilityData = getVisibilityPercentile();
+  const visibilityData = getAIVisibilityMetrics();
   const mentionsData = getMentionsPercentile();
   const sentiment = getSentiment();
   const brandName = getBrandName();
@@ -59,8 +59,8 @@ const Overview = () => {
             </div>
             <PercentileGauge
               percentile={visibilityData.percentile}
-              subtitle1={`You are ahead of ${visibilityData.percentile}% of brands`}
-              subtitle2={`Based on ${visibilityData.totalBrands} brands`}
+              subtitle1={`Visibility Score: ${visibilityData.score}`}
+              subtitle2={`${visibilityData.percentile}% ahead of ${visibilityData.totalBrands} brands`}
             />
             <div className="flex justify-center mt-3">
               <TierBadge tier={visibilityData.tier} />
