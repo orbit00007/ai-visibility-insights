@@ -1,10 +1,11 @@
 import { Layout } from "@/components/layout/Layout";
-import { getAnalytics } from "@/data/analyticsData";
+import { getAnalytics, getBrandName } from "@/data/analyticsData";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
 const Prompts = () => {
   const analytics = getAnalytics();
+  const brandName = getBrandName();
   const keywords = analytics?.analysis_scope?.search_keywords || [];
   const visibilityTable = analytics?.competitor_visibility_table;
   const [expandedKeyword, setExpandedKeyword] = useState<string | null>(null);
@@ -14,8 +15,15 @@ const Prompts = () => {
     k.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Get Kommunicate's scores for each keyword
-  const kommunicateRow = visibilityTable?.rows?.find(row => row[0] === 'Kommunicate');
+  // Get brand's scores for each keyword
+  const brandRow = visibilityTable?.rows?.find(row => row[0] === brandName);
+
+  const getScoreClasses = (score: number) => {
+    if (score >= 7) return 'bg-green-500 text-white';
+    if (score >= 4) return 'bg-amber-500 text-white';
+    if (score > 0) return 'bg-red-500 text-white';
+    return 'bg-gray-500 text-white';
+  };
 
   return (
     <Layout>
@@ -46,7 +54,7 @@ const Prompts = () => {
               <tr className="border-b border-border bg-muted/30">
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground w-8"></th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Keyword / Prompt</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Kommunicate Score</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{brandName} Score</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Top Competitor</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Top Score</th>
               </tr>
@@ -54,7 +62,7 @@ const Prompts = () => {
             <tbody>
               {filteredKeywords.map((keyword, index) => {
                 const keywordIndex = index + 1;
-                const kommunicateScore = kommunicateRow ? kommunicateRow[keywordIndex] as number : 0;
+                const brandScore = brandRow ? brandRow[keywordIndex] as number : 0;
                 
                 // Find top competitor for this keyword
                 let topCompetitor = '';
@@ -85,17 +93,13 @@ const Prompts = () => {
                       </td>
                       <td className="py-3 px-4 font-medium text-foreground">{keyword}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          kommunicateScore >= 7 ? 'bg-green-500/20 text-green-400' :
-                          kommunicateScore >= 4 ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'
-                        }`}>
-                          {kommunicateScore}
+                        <span className={`px-2 py-1 rounded text-sm font-medium ${getScoreClasses(brandScore)}`}>
+                          {brandScore}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-muted-foreground">{topCompetitor}</td>
                       <td className="py-3 px-4">
-                        <span className="px-2 py-1 rounded text-sm bg-primary/20 text-primary">
+                        <span className="px-2 py-1 rounded text-sm font-medium bg-primary text-primary-foreground">
                           {topScore}
                         </span>
                       </td>
@@ -109,17 +113,13 @@ const Prompts = () => {
                               {visibilityTable?.rows?.map(row => {
                                 const name = row[0] as string;
                                 const score = row[keywordIndex] as number;
+                                const isBrand = name === brandName;
                                 return (
                                   <div key={name} className="flex items-center justify-between bg-card p-3 rounded-lg border border-border">
-                                    <span className={name === 'Kommunicate' ? 'text-primary font-medium' : 'text-foreground'}>
+                                    <span className={isBrand ? 'text-primary font-medium' : 'text-foreground'}>
                                       {name}
                                     </span>
-                                    <span className={`px-2 py-1 rounded text-sm ${
-                                      score >= 7 ? 'bg-green-500/20 text-green-400' :
-                                      score >= 4 ? 'bg-yellow-500/20 text-yellow-400' :
-                                      score > 0 ? 'bg-red-500/20 text-red-400' :
-                                      'bg-muted text-muted-foreground'
-                                    }`}>
+                                    <span className={`px-2 py-1 rounded text-sm font-medium ${getScoreClasses(score)}`}>
                                       {score}
                                     </span>
                                   </div>
