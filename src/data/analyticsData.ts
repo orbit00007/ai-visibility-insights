@@ -6,8 +6,8 @@ export const analyticsData = rawData;
 // Helper to get the main analytics object
 export const getAnalytics = () => rawData.analytics[0]?.analytics;
 
-// Get brand name
-export const getBrandName = () => getAnalytics()?.brand_name || 'Tesla';
+// Get brand name (fully dynamic from data)
+export const getBrandName = () => getAnalytics()?.brand_name || '';
 
 // Get all competitor names from the visibility table
 export const getCompetitorNames = (): string[] => {

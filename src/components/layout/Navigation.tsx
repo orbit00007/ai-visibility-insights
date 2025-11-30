@@ -25,6 +25,7 @@ const navItems = [
     dropdown: [
       { label: "Comparisons", path: "/competitors-comparisons" },
       { label: "Topics Matrix", path: "/competitors-topics" },
+      { label: "Brand Sentiment", path: "/brand-sentiment" },
       { label: "Settings", path: "/competitors-settings" },
     ],
   },
