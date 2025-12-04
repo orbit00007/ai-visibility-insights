@@ -2,14 +2,17 @@ import { Layout } from "@/components/layout/Layout";
 import { getAnalytics, getBrandName } from "@/data/analyticsData";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const Prompts = () => {
+  const [searchParams] = useSearchParams();
+  const initialKeyword = searchParams.get("keyword") || "";
   const analytics = getAnalytics();
   const brandName = getBrandName();
   const keywords = analytics?.analysis_scope?.search_keywords || [];
   const visibilityTable = analytics?.competitor_visibility_table;
   const [expandedKeyword, setExpandedKeyword] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialKeyword);
 
   const filteredKeywords = keywords.filter(k => 
     k.toLowerCase().includes(searchQuery.toLowerCase())
