@@ -31,8 +31,21 @@ export const CompetitorMentions = () => {
           
           return (
             <div key={competitor.name} className="flex items-center gap-3">
-              <div className="flex items-center gap-2 w-36 flex-shrink-0">
-                <div className={`w-2 h-2 rounded-full ${isPrimaryBrand ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
+              <div className="flex items-center gap-2 w-40 flex-shrink-0">
+                {competitor.logo ? (
+                  <img 
+                    src={competitor.logo} 
+                    alt={competitor.name} 
+                    className="w-5 h-5 rounded-full object-contain bg-white"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                    isPrimaryBrand ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {competitor.name[0]}
+                  </div>
+                )}
                 <span className={`text-sm truncate ${isPrimaryBrand ? "text-primary font-semibold" : "text-foreground"}`}>
                   {competitor.name}
                 </span>
