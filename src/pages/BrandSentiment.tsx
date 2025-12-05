@@ -1,11 +1,12 @@
 import { Layout } from "@/components/layout/Layout";
 import { TierBadge } from "@/components/ui/TierBadge";
-import { competitorSentiment, getBrandName, getSentiment } from "@/data/analyticsData";
+import { competitorSentiment, getBrandName, getSentiment, getBrandLogo } from "@/data/analyticsData";
 import { Info, MessageCircle } from "lucide-react";
 
 const BrandSentiment = () => {
   const brandName = getBrandName();
   const sentiment = getSentiment();
+  const brandLogo = getBrandLogo(brandName);
 
   return (
     <Layout>
@@ -21,7 +22,15 @@ const BrandSentiment = () => {
 
         {/* Primary Brand Sentiment */}
         <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-3 mb-4">
+            {brandLogo && (
+              <img 
+                src={brandLogo} 
+                alt={brandName} 
+                className="w-8 h-8 rounded-full object-contain bg-white"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
             <MessageCircle className="w-5 h-5 text-primary" />
             <h3 className="text-lg font-semibold text-foreground">{brandName} Sentiment Overview</h3>
           </div>
@@ -54,8 +63,23 @@ const BrandSentiment = () => {
                       className={`border-b border-border/50 ${isPrimaryBrand ? 'bg-primary/5' : 'hover:bg-muted/20'}`}
                     >
                       <td className={`py-4 px-6 font-medium ${isPrimaryBrand ? 'text-primary' : 'text-foreground'}`}>
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${isPrimaryBrand ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
+                        <div className="flex items-center gap-3">
+                          {item.logo ? (
+                            <img 
+                              src={item.logo} 
+                              alt={item.brand} 
+                              className="w-6 h-6 rounded-full object-contain bg-white"
+                              onError={(e) => { 
+                                e.currentTarget.style.display = 'none'; 
+                                (e.currentTarget.nextSibling as HTMLElement)?.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            isPrimaryBrand ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                          } ${item.logo ? 'hidden' : ''}`}>
+                            {item.brand[0]}
+                          </div>
                           {item.brand}
                         </div>
                       </td>
@@ -74,8 +98,8 @@ const BrandSentiment = () => {
         {/* Sentiment Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {['Positive', 'Neutral', 'Negative'].map(sentimentType => {
-            const count = competitorSentiment.filter(c => c.outlook === sentimentType).length;
-            const brands = competitorSentiment.filter(c => c.outlook === sentimentType).map(c => c.brand);
+            const matchingBrands = competitorSentiment.filter(c => c.outlook === sentimentType);
+            const count = matchingBrands.length;
             
             return (
               <div key={sentimentType} className="bg-card rounded-xl border border-border p-6">
@@ -84,14 +108,24 @@ const BrandSentiment = () => {
                   <span className="text-2xl font-bold text-foreground">{count}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">Brands with {sentimentType.toLowerCase()} outlook</p>
-                <div className="flex flex-wrap gap-1">
-                  {brands.map(brand => (
-                    <span 
-                      key={brand} 
-                      className={`text-xs px-2 py-1 rounded ${brand === brandName ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}
+                <div className="flex flex-wrap gap-2">
+                  {matchingBrands.map(item => (
+                    <div 
+                      key={item.brand} 
+                      className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded ${
+                        item.brand === brandName ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+                      }`}
                     >
-                      {brand}
-                    </span>
+                      {item.logo && (
+                        <img 
+                          src={item.logo} 
+                          alt={item.brand} 
+                          className="w-4 h-4 rounded-full object-contain bg-white"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      )}
+                      {item.brand}
+                    </div>
                   ))}
                 </div>
               </div>

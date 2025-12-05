@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
-import { getAnalytics, competitorData, competitorSentiment, getCompetitorVisibility, getBrandName, getKeywords } from "@/data/analyticsData";
+import { getAnalytics, competitorData, competitorSentiment, getCompetitorVisibility, getBrandName, getKeywords, getBrandLogo } from "@/data/analyticsData";
 import { TierBadge } from "@/components/ui/TierBadge";
 import { useState } from "react";
 
@@ -19,6 +19,9 @@ const CompetitorsComparisons = () => {
 
   const brandSentiment = competitorSentiment.find(s => s.brand === brandName);
   const competitorSentimentData = competitorSentiment.find(s => s.brand === selectedCompetitor);
+
+  const brandLogo = getBrandLogo(brandName);
+  const competitorLogo = getBrandLogo(selectedCompetitor);
 
   return (
     <Layout>
@@ -43,10 +46,19 @@ const CompetitorsComparisons = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Primary Brand */}
           <div className="bg-card rounded-xl border-2 border-primary p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                {brandName[0]}
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              {brandLogo ? (
+                <img 
+                  src={brandLogo} 
+                  alt={brandName} 
+                  className="w-10 h-10 rounded-full object-contain bg-white"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                  {brandName[0]}
+                </div>
+              )}
               <h3 className="text-xl font-bold text-primary">{brandName}</h3>
             </div>
             <div className="space-y-4">
@@ -74,10 +86,19 @@ const CompetitorsComparisons = () => {
 
           {/* Selected Competitor */}
           <div className="bg-card rounded-xl border border-border p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-foreground font-bold">
-                {selectedCompetitor[0]}
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              {competitorLogo ? (
+                <img 
+                  src={competitorLogo} 
+                  alt={selectedCompetitor} 
+                  className="w-10 h-10 rounded-full object-contain bg-white"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground font-bold">
+                  {selectedCompetitor[0]}
+                </div>
+              )}
               <h3 className="text-xl font-bold text-foreground">{selectedCompetitor}</h3>
             </div>
             <div className="space-y-4">
@@ -173,7 +194,20 @@ const CompetitorsComparisons = () => {
                     <tr key={c.name} className={`border-b border-border/50 hover:bg-muted/20 ${isPrimaryBrand ? 'bg-primary/5' : ''}`}>
                       <td className={`py-3 px-4 font-medium ${isPrimaryBrand ? 'text-primary' : 'text-foreground'}`}>
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${isPrimaryBrand ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
+                          {c.logo ? (
+                            <img 
+                              src={c.logo} 
+                              alt={c.name} 
+                              className="w-6 h-6 rounded-full object-contain bg-white"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          ) : (
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                              isPrimaryBrand ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                            }`}>
+                              {c.name[0]}
+                            </div>
+                          )}
                           {c.name}
                         </div>
                       </td>

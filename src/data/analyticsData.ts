@@ -9,6 +9,9 @@ export const getAnalytics = () => rawData.analytics[0]?.analytics;
 // Get brand name (fully dynamic from data)
 export const getBrandName = () => getAnalytics()?.brand_name || '';
 
+// Get brand website
+export const getBrandWebsite = () => getAnalytics()?.brand_website || '';
+
 // Get all competitor names from the visibility table
 export const getCompetitorNames = (): string[] => {
   const analytics = getAnalytics();
@@ -23,12 +26,31 @@ export const getKeywords = (): string[] => {
   return analytics.competitor_visibility_table.header.slice(1);
 };
 
+// Get brand info with logos from percentile_trace
+export const getBrandInfoWithLogos = (): Array<{
+  brand: string;
+  geo_score: number;
+  brand_mentionscore: number;
+  logo: string;
+}> => {
+  const analytics = getAnalytics();
+  return analytics?.ai_visibility?.percentile_trace?.sorted_brand_info || [];
+};
+
+// Get logo for a specific brand
+export const getBrandLogo = (brandName: string): string => {
+  const brandInfo = getBrandInfoWithLogos();
+  const brand = brandInfo.find(b => b.brand === brandName);
+  return brand?.logo || '';
+};
+
 // Competitor data derived from competitor_visibility_table with percentiles
 export const competitorData = (() => {
   const analytics = getAnalytics();
   if (!analytics?.competitor_visibility_table?.rows) return [];
   
   const keywords = getKeywords();
+  const brandInfoWithLogos = getBrandInfoWithLogos();
   
   return analytics.competitor_visibility_table.rows.map(row => {
     const name = row[0] as string;
@@ -41,10 +63,14 @@ export const competitorData = (() => {
       totalScore += score;
     }
     
+    // Get logo from percentile_trace
+    const brandInfo = brandInfoWithLogos.find(b => b.brand === name);
+    
     return {
       name,
       keywordScores,
-      totalScore
+      totalScore,
+      logo: brandInfo?.logo || ''
     };
   }).sort((a, b) => b.totalScore - a.totalScore);
 })();
@@ -63,33 +89,30 @@ export const getAllBrandVisibilityScores = (): number[] => {
   return competitorData.map(c => c.totalScore);
 };
 
-// Get AI Visibility data directly from the JSON (weighted_mentions_total, tier, etc.)
+// Get AI Visibility data using geo_score and percentile_visibility from data
 export const getAIVisibilityMetrics = (): { 
   score: number; 
   tier: string; 
   percentile: number;
   totalBrands: number;
-  breakdown: { top_two_mentions: number; top_five_mentions: number; later_mentions: number; calculation: string } | null;
   explanation: string;
+  calculation: string;
 } => {
   const analytics = getAnalytics();
   const aiVisibility = analytics?.ai_visibility;
   
-  // Calculate percentile based on competitor visibility scores
-  const brandName = getBrandName();
-  const brand = competitorData.find(c => c.name === brandName);
-  const allScores = getAllBrandVisibilityScores();
-  const percentile = brand 
-    ? calculatePercentile(brand.totalScore, allScores)
-    : 0;
+  // Use geo_score and percentile_visibility directly from the data
+  const score = aiVisibility?.geo_score || 0;
+  const percentile = aiVisibility?.percentile_visibility || 0;
+  const totalBrands = aiVisibility?.percentile_trace?.total_brands || competitorData.length;
   
   return {
-    score: aiVisibility?.weighted_mentions_total || 0,
-    tier: getTierFromPercentile(percentile), // Calculate tier from percentile, not from data
+    score,
+    tier: getTierFromPercentile(percentile),
     percentile,
-    totalBrands: competitorData.length,
-    breakdown: aiVisibility?.breakdown || null,
-    explanation: aiVisibility?.explanation || ''
+    totalBrands,
+    explanation: aiVisibility?.explanation || '',
+    calculation: aiVisibility?.percentile_trace?.calculation || ''
   };
 };
 
@@ -151,7 +174,7 @@ export const getMentionsPercentile = (): {
   
   return {
     percentile,
-    tier: getTierFromPercentile(percentile), // High ≥80, Medium 40-79, Low <40
+    tier: getTierFromPercentile(percentile),
     totalBrands: Object.keys(mentionCounts).length,
     topBrandMentions,
     brandMentions,
@@ -160,17 +183,20 @@ export const getMentionsPercentile = (): {
 };
 
 // Get all brands with their mention counts and calculated tiers
-export const getAllBrandMentionsWithTiers = (): Array<{ brand: string; mentions: number; percentile: number; tier: string }> => {
+export const getAllBrandMentionsWithTiers = (): Array<{ brand: string; mentions: number; percentile: number; tier: string; logo: string }> => {
   const mentionCounts = getBrandMentionCounts();
   const allMentions = Object.values(mentionCounts);
+  const brandInfoWithLogos = getBrandInfoWithLogos();
   
   return Object.entries(mentionCounts).map(([brand, mentions]) => {
     const percentile = calculatePercentile(mentions, allMentions);
+    const brandInfo = brandInfoWithLogos.find(b => b.brand === brand);
     return {
       brand,
       mentions,
       percentile,
-      tier: getTierFromPercentile(percentile)
+      tier: getTierFromPercentile(percentile),
+      logo: brandInfo?.logo || ''
     };
   }).sort((a, b) => b.mentions - a.mentions);
 };
@@ -248,11 +274,18 @@ export const competitorSentiment = (() => {
   const analytics = getAnalytics();
   if (!analytics?.competitor_sentiment_table?.rows) return [];
   
-  return analytics.competitor_sentiment_table.rows.map((row: any[]) => ({
-    brand: row[0] as string,
-    summary: row[1] as string,
-    outlook: row[2] as string
-  }));
+  const brandInfoWithLogos = getBrandInfoWithLogos();
+  
+  return analytics.competitor_sentiment_table.rows.map((row: any[]) => {
+    const brandName = row[0] as string;
+    const brandInfo = brandInfoWithLogos.find(b => b.brand === brandName);
+    return {
+      brand: brandName,
+      summary: row[1] as string,
+      outlook: row[2] as string,
+      logo: brandInfo?.logo || ''
+    };
+  });
 })();
 
 // Get search keywords
@@ -300,4 +333,10 @@ export const getPrimaryBrandTotalMentions = (): number => {
   const mentionCounts = getBrandMentionCounts();
   const brandName = getBrandName();
   return mentionCounts[brandName] || 0;
+};
+
+// Get platform presence
+export const getPlatformPresence = () => {
+  const analytics = getAnalytics();
+  return analytics?.platform_presence || {};
 };
