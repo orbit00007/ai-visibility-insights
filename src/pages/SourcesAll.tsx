@@ -1,132 +1,198 @@
 import { Layout } from "@/components/layout/Layout";
-import { getAnalytics, getSourcesData, getBrandName, getDepthNotes } from "@/data/analyticsData";
+import { getSourcesData, getBrandName, getDepthNotes, getBrandInfoWithLogos } from "@/data/analyticsData";
 import { TierBadge } from "@/components/ui/TierBadge";
-import { ChevronDown, ChevronRight, Globe, FileText } from "lucide-react";
+import { ChevronDown, ChevronRight, Globe, FileText, Layers, BookOpen } from "lucide-react";
 import { useState } from "react";
 
 const SourcesAll = () => {
-  const analytics = getAnalytics();
   const brandName = getBrandName();
   const sourcesData = getSourcesData();
   const depthNotes = getDepthNotes();
+  const brandInfo = getBrandInfoWithLogos();
   const [expandedSource, setExpandedSource] = useState<string | null>(null);
 
   // Calculate totals
   const totalSources = sourcesData.length;
   const brandMentionsKey = `${brandName}Mentions`;
+  const brandPresenceKey = `${brandName}Presence`;
   const sourcesWithMentions = sourcesData.filter(s => (s[brandMentionsKey] || 0) > 0).length;
   const totalMentions = sourcesData.reduce((acc, s) => acc + (s[brandMentionsKey] || 0), 0);
+  const presentSources = sourcesData.filter(s => s[brandPresenceKey] === 'Present').length;
+
+  const getBrandLogo = (name: string) => {
+    const brand = brandInfo.find(b => b.brand === name);
+    return brand?.logo;
+  };
 
   return (
     <Layout>
       <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">All Sources</h1>
+        {/* Header with gradient */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border border-primary/20 p-6">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="relative flex items-center gap-3">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <Layers className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Sources & Content Impact</h1>
+              <p className="text-sm text-muted-foreground">Where your brand is being cited by AI</p>
+            </div>
+          </div>
+        </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-card rounded-xl border border-border p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Globe className="w-5 h-5 text-primary" />
-              <span className="text-sm text-muted-foreground">Total Source Categories</span>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Globe className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm text-muted-foreground">Source Categories</span>
             </div>
             <span className="text-3xl font-bold text-foreground">{totalSources}</span>
           </div>
           
-          <div className="bg-card rounded-xl border border-border p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-5 h-5 text-primary" />
-              <span className="text-sm text-muted-foreground">Sources with Mentions</span>
+          <div className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <FileText className="w-5 h-5 text-green-500" />
+              </div>
+              <span className="text-sm text-muted-foreground">Present In</span>
             </div>
-            <span className="text-3xl font-bold text-foreground">{sourcesWithMentions}</span>
+            <span className="text-3xl font-bold text-green-500">{presentSources}</span>
+            <span className="text-sm text-muted-foreground ml-2">of {totalSources}</span>
           </div>
 
-          <div className="bg-card rounded-xl border border-border p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-5 h-5 text-primary" />
+          <div className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-amber-500/10 rounded-lg">
+                <BookOpen className="w-5 h-5 text-amber-500" />
+              </div>
+              <span className="text-sm text-muted-foreground">Sources with Mentions</span>
+            </div>
+            <span className="text-3xl font-bold text-amber-500">{sourcesWithMentions}</span>
+          </div>
+
+          <div className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
               <span className="text-sm text-muted-foreground">Total Mentions</span>
             </div>
-            <span className="text-3xl font-bold text-foreground">{totalMentions}</span>
+            <span className="text-3xl font-bold text-primary">{totalMentions}</span>
           </div>
         </div>
 
         {/* Sources Table */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-8"></th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Source Category</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Presence</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mentions</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cited by LLMs</th>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left py-4 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-8"></th>
+                <th className="text-left py-4 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Source Category</th>
+                <th className="text-center py-4 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Presence</th>
+                <th className="text-center py-4 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mentions</th>
+                <th className="text-center py-4 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Score</th>
               </tr>
             </thead>
             <tbody>
               {sourcesData.map((source) => {
                 const isExpanded = expandedSource === source.name;
                 const notes = depthNotes[source.name as keyof typeof depthNotes];
-                const presence = source[`${brandName}Presence`];
-                const mentions = source[`${brandName}Mentions`] || 0;
+                const presence = source[brandPresenceKey];
+                const mentions = source[brandMentionsKey] || 0;
+                const score = source[`${brandName}Score`];
 
                 return (
                   <>
                     <tr 
                       key={source.name}
-                      className="border-b border-border/50 hover:bg-muted/20 cursor-pointer"
+                      className="border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors"
                       onClick={() => setExpandedSource(isExpanded ? null : source.name)}
                     >
-                      <td className="py-3 px-4">
+                      <td className="py-4 px-4">
                         {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                          <ChevronDown className="w-4 h-4 text-primary" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         )}
                       </td>
-                      <td className="py-3 px-4 font-medium text-foreground">{source.name}</td>
-                      <td className="py-3 px-4">
+                      <td className="py-4 px-4">
+                        <span className="font-medium text-foreground">{source.name}</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
                         <TierBadge tier={presence || 'Absent'} />
                       </td>
-                      <td className="py-3 px-4 text-foreground font-semibold">{mentions}</td>
-                      <td className="py-3 px-4">
-                        <TierBadge tier={source.citedByLLMs} />
+                      <td className="py-4 px-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold ${
+                          mentions > 0 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {mentions}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <TierBadge tier={score || 'Low'} />
                       </td>
                     </tr>
                     {isExpanded && (
-                      <tr className="bg-muted/10">
-                        <td colSpan={5} className="py-4 px-8">
-                          <div className="space-y-4">
-                            {notes && typeof notes === 'object' && 'insight' in notes ? (
+                      <tr className="bg-muted/20">
+                        <td colSpan={5} className="py-6 px-8">
+                          <div className="space-y-6">
+                            {notes && typeof notes === 'object' && 'insight' in notes && (
                               <>
-                                <div>
-                                  <h4 className="font-medium text-foreground mb-2">Insight</h4>
-                                  <p className="text-muted-foreground">{(notes as any).insight}</p>
+                                <div className="bg-card p-4 rounded-xl border border-border">
+                                  <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                                    <BookOpen className="w-4 h-4 text-primary" />
+                                    Insight
+                                  </h4>
+                                  <p className="text-muted-foreground leading-relaxed">{(notes as any).insight}</p>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium text-foreground mb-2">Pages Used</h4>
+                                  <h4 className="font-semibold text-foreground mb-3">Pages Used</h4>
                                   <div className="flex flex-wrap gap-2">
                                     {((notes as any).pages_used || []).map((page: string, idx: number) => (
-                                      <span key={idx} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                                      <span key={idx} className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
                                         {page}
                                       </span>
                                     ))}
                                   </div>
                                 </div>
                               </>
-                            ) : (
-                              <p className="text-muted-foreground">No detailed notes available for this source.</p>
                             )}
-                            {source.pagesUsed && source.pagesUsed[0] !== 'Absent' && (
-                              <div>
-                                <h4 className="font-medium text-foreground mb-2">Source Types</h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {source.pagesUsed.map((page, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-muted text-foreground rounded-full text-sm">
-                                      {page}
-                                    </span>
-                                  ))}
-                                </div>
+                            
+                            {/* Show all brands for this source */}
+                            <div>
+                              <h4 className="font-semibold text-foreground mb-3">All Brands in this Source</h4>
+                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                                {brandInfo.map(brand => {
+                                  const brandPresence = source[`${brand.brand}Presence`];
+                                  const brandMentions = source[`${brand.brand}Mentions`] || 0;
+                                  const isCurrent = brand.brand === brandName;
+                                  
+                                  return (
+                                    <div 
+                                      key={brand.brand}
+                                      className={`flex flex-col items-center p-4 rounded-xl border transition-all ${
+                                        isCurrent 
+                                          ? 'bg-primary/10 border-primary/30' 
+                                          : 'bg-card border-border'
+                                      }`}
+                                    >
+                                      {brand.logo && (
+                                        <img src={brand.logo} alt="" className="w-10 h-10 rounded-full object-contain bg-white mb-2" />
+                                      )}
+                                      <span className={`text-sm font-medium mb-2 ${isCurrent ? 'text-primary' : 'text-foreground'}`}>
+                                        {brand.brand}
+                                      </span>
+                                      <TierBadge tier={brandPresence || 'Absent'} />
+                                      <span className="text-xs text-muted-foreground mt-1">{brandMentions} mentions</span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            )}
+                            </div>
                           </div>
                         </td>
                       </tr>
