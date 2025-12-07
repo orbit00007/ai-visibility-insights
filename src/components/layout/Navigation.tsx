@@ -45,14 +45,14 @@ export const Navigation = () => {
   };
 
   return (
-    <nav className="border-b border-border bg-card">
-      <div className="flex items-center gap-1 px-6">
+    <nav className="border-b border-border bg-card hidden md:block">
+      <div className="flex items-center gap-1 px-6 overflow-x-auto">
         {navItems.map((item) =>
           item.dropdown ? (
             <DropdownMenu key={item.label}>
               <DropdownMenuTrigger
                 className={cn(
-                  "nav-tab flex items-center gap-1 outline-none",
+                  "nav-tab flex items-center gap-1 outline-none whitespace-nowrap",
                   isActive(item.path, item.dropdown) && "nav-tab-active",
                   item.comingSoon && "opacity-60"
                 )}
@@ -61,7 +61,7 @@ export const Navigation = () => {
                 {item.comingSoon && <Lock className="w-3 h-3 ml-1" />}
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-card border-border">
+              <DropdownMenuContent align="start" className="bg-card border-border z-50">
                 {item.comingSoon && (
                   <div className="px-2 py-1.5 text-xs text-muted-foreground border-b border-border mb-1">
                     Coming Soon
@@ -94,7 +94,7 @@ export const Navigation = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                "nav-tab",
+                "nav-tab whitespace-nowrap",
                 location.pathname === item.path && "nav-tab-active"
               )}
             >
