@@ -16,14 +16,12 @@ export const PercentileGauge: React.FC<PercentileGaugeProps> = ({
   size = 180,
   label
 }) => {
-  const strokeWidth = 16;
+  const strokeWidth = 14;
   const radius = (size - strokeWidth) / 2;
   const circumference = Math.PI * radius;
   const progress = (percentile / 100) * circumference;
   
   const gaugeColor = getGaugeColor(percentile);
-  
-  // Create gradient stops based on the gauge
   const gradientId = `gaugeGradient-${Math.random().toString(36).substr(2, 9)}`;
 
   return (
@@ -33,54 +31,42 @@ export const PercentileGauge: React.FC<PercentileGaugeProps> = ({
           width={size}
           height={size / 2 + 30}
           viewBox={`0 0 ${size} ${size / 2 + 30}`}
-          className="drop-shadow-lg"
         >
           <defs>
-            {/* Background gradient for track */}
+            {/* Clean gradient for track */}
             <linearGradient id={`${gradientId}-track`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(0, 84%, 60%)" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="hsl(45, 93%, 47%)" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="hsl(142, 71%, 45%)" stopOpacity="0.15" />
+              <stop offset="0%" stopColor="hsl(var(--muted))" />
+              <stop offset="100%" stopColor="hsl(var(--muted))" />
             </linearGradient>
             
-            {/* Colored segments for visual appeal */}
+            {/* Colored segments gradient */}
             <linearGradient id={`${gradientId}-segments`} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="hsl(0, 84%, 55%)" />
-              <stop offset="35%" stopColor="hsl(35, 90%, 50%)" />
-              <stop offset="65%" stopColor="hsl(45, 93%, 47%)" />
+              <stop offset="40%" stopColor="hsl(45, 93%, 47%)" />
               <stop offset="100%" stopColor="hsl(142, 71%, 45%)" />
             </linearGradient>
-            
-            {/* Glow filter */}
-            <filter id={`${gradientId}-glow`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
           </defs>
           
-          {/* Background track with subtle gradient */}
+          {/* Background track */}
           <path
             d={`M ${strokeWidth / 2} ${size / 2 + 5} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${size / 2 + 5}`}
             fill="none"
-            stroke={`url(#${gradientId}-track)`}
-            strokeWidth={strokeWidth + 4}
+            stroke="hsl(var(--muted))"
+            strokeWidth={strokeWidth}
             strokeLinecap="round"
           />
           
-          {/* Colored segment track */}
+          {/* Faint color guide */}
           <path
             d={`M ${strokeWidth / 2} ${size / 2 + 5} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${size / 2 + 5}`}
             fill="none"
             stroke={`url(#${gradientId}-segments)`}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
-            opacity={0.25}
+            opacity={0.15}
           />
           
-          {/* Progress arc with glow */}
+          {/* Progress arc */}
           <path
             d={`M ${strokeWidth / 2} ${size / 2 + 5} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${size / 2 + 5}`}
             fill="none"
@@ -89,8 +75,7 @@ export const PercentileGauge: React.FC<PercentileGaugeProps> = ({
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={circumference - progress}
-            filter={`url(#${gradientId}-glow)`}
-            style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+            style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
           />
           
           {/* Tick marks */}
@@ -99,14 +84,9 @@ export const PercentileGauge: React.FC<PercentileGaugeProps> = ({
           <text x={size - strokeWidth - 14} y={size / 2 + 25} className="fill-muted-foreground text-[10px] font-medium">100</text>
         </svg>
         
-        {/* Center value with animated appearance */}
+        {/* Center value */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-4">
-          <span 
-            className="text-5xl font-bold text-foreground tracking-tight"
-            style={{ 
-              textShadow: `0 0 20px ${gaugeColor}40`,
-            }}
-          >
+          <span className="text-5xl font-bold text-foreground tracking-tight">
             {percentile}
           </span>
           {label && (
@@ -115,7 +95,7 @@ export const PercentileGauge: React.FC<PercentileGaugeProps> = ({
         </div>
       </div>
       
-      {/* Subtitles with improved styling */}
+      {/* Subtitles */}
       <div className="text-center space-y-1 mt-1">
         <p className="text-sm font-medium text-foreground">{subtitle1}</p>
         <p className="text-xs text-muted-foreground">{subtitle2}</p>
