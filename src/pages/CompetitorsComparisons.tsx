@@ -2,7 +2,12 @@ import { Layout } from "@/components/layout/Layout";
 import { getAnalytics, competitorData, competitorSentiment, getCompetitorVisibility, getBrandName, getKeywords, getBrandLogo, getBrandInfoWithLogos } from "@/data/analyticsData";
 import { TierBadge } from "@/components/ui/TierBadge";
 import { useState, useMemo } from "react";
-import { Trophy, Users, TrendingUp } from "lucide-react";
+import { Trophy, Users, TrendingUp, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const CompetitorsComparisons = () => {
   const analytics = getAnalytics();
@@ -30,11 +35,6 @@ const CompetitorsComparisons = () => {
     return [...competitorData].sort((a, b) => b.totalScore - a.totalScore);
   }, []);
 
-  // Sort competitor visibility by visibility descending
-  const sortedCompetitorVisibility = useMemo(() => {
-    return [...competitorVisibility].sort((a, b) => b.visibility - a.visibility);
-  }, [competitorVisibility]);
-
   return (
     <Layout>
       <div className="p-4 md:p-6 space-y-6">
@@ -46,7 +46,17 @@ const CompetitorsComparisons = () => {
               <Trophy className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">Competitor Comparisons</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-bold text-foreground">Competitor Comparisons</h1>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs bg-card border border-border">
+                    <p>Compare your brand's visibility metrics against competitors.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <p className="text-sm text-muted-foreground">Compare your brand visibility against competitors</p>
             </div>
           </div>
@@ -61,7 +71,7 @@ const CompetitorsComparisons = () => {
           <select
             value={selectedCompetitor}
             onChange={(e) => setSelectedCompetitor(e.target.value)}
-            className="w-full md:w-auto bg-muted/30 border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full md:w-auto bg-card border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
             {otherCompetitors.map(c => (
               <option key={c.name} value={c.name}>{c.name}</option>
@@ -72,78 +82,81 @@ const CompetitorsComparisons = () => {
         {/* Side by Side Comparison */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* Primary Brand */}
-          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border-2 border-primary p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              {brandLogo ? (
-                <img 
-                  src={brandLogo} 
-                  alt={brandName} 
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full object-contain bg-white shadow-md"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
-              ) : (
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
-                  {brandName[0]}
+          <div className="bg-card rounded-xl border-2 border-primary p-4 md:p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                {brandLogo ? (
+                  <img 
+                    src={brandLogo} 
+                    alt={brandName} 
+                    className="w-12 h-12 md:w-14 md:h-14 rounded-full object-contain bg-white shadow-lg"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
+                    {brandName[0]}
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-xl md:text-2xl font-bold text-primary">{brandName}</h3>
+                  <span className="text-xs text-muted-foreground bg-primary/10 px-2 py-0.5 rounded-full">Your Brand</span>
                 </div>
-              )}
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-primary">{brandName}</h3>
-                <span className="text-xs text-muted-foreground">Your Brand</span>
               </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-card rounded-lg">
-                <span className="text-muted-foreground text-sm">Total Score</span>
-                <span className="text-2xl font-bold text-foreground">{brand?.totalScore || 0}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-card rounded-lg">
-                <span className="text-muted-foreground text-sm">Visibility</span>
-                <span className="text-xl font-semibold text-primary">{brand?.visibility || 0}%</span>
-              </div>
-              <div className="h-3 bg-card rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full transition-all duration-500"
-                  style={{ width: `${brand?.visibility || 0}%` }}
-                />
-              </div>
-              <div className="pt-4 border-t border-border/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm text-muted-foreground">Sentiment:</span>
-                  <TierBadge tier={brandSentiment?.outlook || 'N/A'} />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-4 bg-muted/30 rounded-xl">
+                  <span className="text-muted-foreground text-sm">Total Score</span>
+                  <span className="text-3xl font-bold text-foreground">{brand?.totalScore || 0}</span>
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">{brandSentiment?.summary}</p>
+                <div className="flex justify-between items-center p-4 bg-muted/30 rounded-xl">
+                  <span className="text-muted-foreground text-sm">Visibility</span>
+                  <span className="text-2xl font-bold text-primary">{brand?.visibility || 0}%</span>
+                </div>
+                <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full transition-all duration-500"
+                    style={{ width: `${brand?.visibility || 0}%` }}
+                  />
+                </div>
+                <div className="pt-4 border-t border-border/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm text-muted-foreground">Sentiment:</span>
+                    <TierBadge tier={brandSentiment?.outlook || 'N/A'} />
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{brandSentiment?.summary}</p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Selected Competitor */}
           <div className="bg-card rounded-xl border border-border p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               {competitorLogo ? (
                 <img 
                   src={competitorLogo} 
                   alt={selectedCompetitor} 
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full object-contain bg-white shadow-md"
+                  className="w-12 h-12 md:w-14 md:h-14 rounded-full object-contain bg-white shadow-lg"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               ) : (
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted flex items-center justify-center text-foreground font-bold text-lg">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-muted flex items-center justify-center text-foreground font-bold text-xl">
                   {selectedCompetitor[0]}
                 </div>
               )}
               <div>
-                <h3 className="text-lg md:text-xl font-bold text-foreground">{selectedCompetitor}</h3>
-                <span className="text-xs text-muted-foreground">Competitor</span>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground">{selectedCompetitor}</h3>
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Competitor</span>
               </div>
             </div>
             <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+              <div className="flex justify-between items-center p-4 bg-muted/30 rounded-xl">
                 <span className="text-muted-foreground text-sm">Total Score</span>
-                <span className="text-2xl font-bold text-foreground">{competitor?.totalScore || 0}</span>
+                <span className="text-3xl font-bold text-foreground">{competitor?.totalScore || 0}</span>
               </div>
-              <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+              <div className="flex justify-between items-center p-4 bg-muted/30 rounded-xl">
                 <span className="text-muted-foreground text-sm">Visibility</span>
-                <span className="text-xl font-semibold text-foreground">{competitor?.visibility || 0}%</span>
+                <span className="text-2xl font-bold text-foreground">{competitor?.visibility || 0}%</span>
               </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <div 
@@ -188,16 +201,16 @@ const CompetitorsComparisons = () => {
                   const diff = bScore - cScore;
 
                   return (
-                    <tr key={keyword} className="border-b border-border/50 hover:bg-muted/20">
+                    <tr key={keyword} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                       <td className="py-3 px-4 text-foreground text-sm">{keyword}</td>
                       <td className="py-3 px-4 text-center">
-                        <span className="px-3 py-1.5 bg-primary/20 text-primary rounded font-semibold text-sm">{bScore}</span>
+                        <span className="px-3 py-1.5 bg-primary/20 text-primary rounded-lg font-semibold text-sm">{bScore}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="px-3 py-1.5 bg-muted text-foreground rounded font-semibold text-sm">{cScore}</span>
+                        <span className="px-3 py-1.5 bg-muted text-foreground rounded-lg font-semibold text-sm">{cScore}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`px-3 py-1.5 rounded font-semibold text-sm ${
+                        <span className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
                           diff > 0 ? 'bg-green-500 text-white' :
                           diff < 0 ? 'bg-red-500 text-white' :
                           'bg-muted text-foreground'
@@ -213,7 +226,7 @@ const CompetitorsComparisons = () => {
           </div>
         </div>
 
-        {/* All Competitors Table - Sorted by Total Score */}
+        {/* All Competitors Table */}
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="p-4 md:p-6 border-b border-border">
             <h3 className="text-lg font-semibold text-foreground">All Competitors Overview</h3>
@@ -234,14 +247,14 @@ const CompetitorsComparisons = () => {
                 {sortedCompetitorData.map(c => {
                   const isPrimaryBrand = c.name === brandName;
                   return (
-                    <tr key={c.name} className={`border-b border-border/50 hover:bg-muted/20 ${isPrimaryBrand ? 'bg-primary/5' : ''}`}>
+                    <tr key={c.name} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${isPrimaryBrand ? 'bg-primary/5' : ''}`}>
                       <td className={`py-3 px-4 font-medium ${isPrimaryBrand ? 'text-primary' : 'text-foreground'}`}>
                         <div className="flex items-center gap-2">
                           {c.logo ? (
                             <img 
                               src={c.logo} 
                               alt={c.name} 
-                              className="w-6 h-6 rounded-full object-contain bg-white"
+                              className="w-6 h-6 rounded-full object-contain bg-white shadow-sm"
                               onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
                           ) : (
@@ -251,14 +264,14 @@ const CompetitorsComparisons = () => {
                               {c.name[0]}
                             </div>
                           )}
-                          <span className="text-sm">{c.name}</span>
+                          <span className="text-sm font-semibold">{c.name}</span>
                         </div>
                       </td>
                       {c.keywordScores.map((score, idx) => (
                         <td key={idx} className="py-3 px-4 text-center text-foreground text-sm hidden md:table-cell">{score}</td>
                       ))}
                       <td className="py-3 px-4 text-center">
-                        <span className={`px-3 py-1.5 rounded font-semibold text-sm ${isPrimaryBrand ? 'bg-primary text-white' : 'bg-muted text-foreground'}`}>
+                        <span className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${isPrimaryBrand ? 'bg-primary text-white' : 'bg-muted text-foreground'}`}>
                           {c.totalScore}
                         </span>
                       </td>

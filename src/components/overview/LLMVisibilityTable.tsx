@@ -1,11 +1,13 @@
 import { llmData, getSearchKeywords } from "@/data/analyticsData";
-import { Bot, TrendingUp } from "lucide-react";
+import { LLMIcon } from "@/components/ui/LLMIcon";
+import { Bot } from "lucide-react";
 
 export const LLMVisibilityTable = () => {
   const keywords = getSearchKeywords();
   
   const platformData = Object.entries(llmData).map(([platform, data]: [string, any]) => ({
-    platform: platform === 'openai' ? 'ChatGPT' : platform.charAt(0).toUpperCase() + platform.slice(1),
+    platform: platform,
+    displayName: platform === 'openai' ? 'ChatGPT' : platform.charAt(0).toUpperCase() + platform.slice(1),
     appearances: data.brand_mentions_count || 0,
     keywords: data.queries_with_brand || 0,
     avgPosition: `#${data.average_brand_rank?.toFixed(1) || 'N/A'}`
@@ -33,13 +35,9 @@ export const LLMVisibilityTable = () => {
             {platformData.map((row, idx) => (
               <tr key={row.platform} className={idx < platformData.length - 1 ? "border-b border-border/50" : ""}>
                 <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      row.platform === 'ChatGPT' ? 'bg-emerald-500' :
-                      row.platform === 'Gemini' ? 'bg-blue-500' :
-                      'bg-purple-500'
-                    }`} />
-                    <span className="font-medium text-foreground">{row.platform}</span>
+                  <div className="flex items-center gap-2.5">
+                    <LLMIcon platform={row.platform} size="md" />
+                    <span className="font-medium text-foreground">{row.displayName}</span>
                   </div>
                 </td>
                 <td className="py-3 px-4 text-center">

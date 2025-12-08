@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout/Layout";
 import { LLMVisibilityTable } from "@/components/overview/LLMVisibilityTable";
 import { PlatformPresence } from "@/components/overview/PlatformPresence";
 import { CompetitorComparisonChart } from "@/components/overview/CompetitorComparisonChart";
-import { KeywordPerformanceChart } from "@/components/overview/KeywordPerformanceChart";
+import { SourceMentionsChart } from "@/components/overview/SourceMentionsChart";
 import { SourceInsights } from "@/components/overview/SourceInsights";
 import { BrandMentionsRadar } from "@/components/overview/BrandMentionsRadar";
 import { PercentileGauge } from "@/components/ui/PercentileGauge";
@@ -15,7 +15,8 @@ import {
   getAnalysisDate,
   getModelName
 } from "@/data/analyticsData";
-import { Info, TrendingUp, MessageSquare, ThumbsUp, Calendar, Bot } from "lucide-react";
+import { LLMIcon } from "@/components/ui/LLMIcon";
+import { Info, TrendingUp, MessageSquare, ThumbsUp, Calendar } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -30,18 +31,21 @@ const Overview = () => {
   const analysisDate = getAnalysisDate();
   const modelName = getModelName();
 
+  // Parse model names for icons
+  const models = modelName?.split(',').map(m => m.trim()) || [];
+
   return (
     <Layout>
-      <div className="p-6 space-y-6">
+      <div className="p-4 md:p-6 space-y-6">
         {/* Header with date and model info */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">Overall Insights</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">Overall Insights</h1>
             <Tooltip>
               <TooltipTrigger>
                 <Info className="w-4 h-4 text-muted-foreground cursor-help" />
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
+              <TooltipContent className="max-w-xs bg-card border border-border">
                 <p>Comprehensive overview of your brand's performance across AI platforms.</p>
               </TooltipContent>
             </Tooltip>
@@ -53,23 +57,27 @@ const Overview = () => {
                 <span>{analysisDate}</span>
               </div>
             )}
-            {modelName && (
-              <div className="flex items-center gap-1.5">
-                <Bot className="w-4 h-4" />
-                <span className="uppercase">{modelName}</span>
+            {models.length > 0 && (
+              <div className="flex items-center gap-2">
+                {models.map((model, idx) => (
+                  <div key={model} className="flex items-center gap-1">
+                    <LLMIcon platform={model} size="sm" />
+                    <span className="hidden sm:inline capitalize">{model === 'openai' ? 'ChatGPT' : model}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
 
-        {/* Main metrics gauges - kept compact */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Main metrics gauges */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* AI Visibility Card */}
-          <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-primary/10">
-                  <TrendingUp className="w-5 h-5 text-primary" />
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                 </div>
                 <span className="text-sm font-medium text-foreground">AI Visibility</span>
               </div>
@@ -84,11 +92,11 @@ const Overview = () => {
           </div>
 
           {/* Brand Mentions Card */}
-          <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-amber-500/10">
-                  <MessageSquare className="w-5 h-5 text-amber-500" />
+                  <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
                 </div>
                 <span className="text-sm font-medium text-foreground">Brand Mentions</span>
               </div>
@@ -103,11 +111,11 @@ const Overview = () => {
           </div>
 
           {/* Sentiment Card */}
-          <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-green-500/10">
-                  <ThumbsUp className="w-5 h-5 text-green-500" />
+                  <ThumbsUp className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
                 </div>
                 <span className="text-sm font-medium text-foreground">Sentiment</span>
               </div>
@@ -122,19 +130,19 @@ const Overview = () => {
         </div>
 
         {/* Charts row - visual comparisons */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <CompetitorComparisonChart />
           <BrandMentionsRadar />
         </div>
 
         {/* LLM Visibility & Platform Presence row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <LLMVisibilityTable />
           <PlatformPresence />
         </div>
 
-        {/* Keyword Performance - full width */}
-        <KeywordPerformanceChart />
+        {/* Source Mentions Chart - full width */}
+        <SourceMentionsChart />
 
         {/* Source Insights - full width */}
         <SourceInsights />
