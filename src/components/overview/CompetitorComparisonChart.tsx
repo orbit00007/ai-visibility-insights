@@ -21,7 +21,7 @@ export const CompetitorComparisonChart = () => {
   const sortedBrands = [...brandsWithPercentile].sort((a, b) => {
     if (viewMode === 'geo_score') return b.geo_score - a.geo_score;
     if (viewMode === 'percentile') return b.percentile - a.percentile;
-    return (b.mention_count || 0) - (a.mention_count || 0);
+    return b.mention_count - a.mention_count;
   });
   
   const chartData = sortedBrands.map(brand => ({
@@ -30,11 +30,11 @@ export const CompetitorComparisonChart = () => {
       ? brand.geo_score 
       : viewMode === 'percentile' 
         ? brand.percentile 
-        : (brand.mention_count || 0),
+        : brand.mention_count,
     geoScore: brand.geo_score,
     percentile: brand.percentile,
-    mentionCount: brand.mention_count || 0,
-    mentionScore: brand.mention_score || 0,
+    mentionCount: brand.mention_count,
+    mentionScore: brand.mention_score,
     logo: brand.logo,
     isBrand: brand.brand === brandName
   }));
