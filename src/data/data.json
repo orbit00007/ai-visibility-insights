@@ -30,37 +30,43 @@
                             {
                                 "brand": "Lucid",
                                 "geo_score": 6,
-                                "brand_mentionscore": 2,
+                                "mention_score": 0,
+                                "mention_count": 6,
                                 "logo": "https://logo.clearbit.com/lucidmotors.com"
                             },
                             {
                                 "brand": "Enphase",
                                 "geo_score": 7,
-                                "brand_mentionscore": 3,
+                                "mention_score": 17,
+                                "mention_count": 7,
                                 "logo": "https://logo.clearbit.com/enphase.com"
                             },
                             {
                                 "brand": "Mercedes-Benz",
                                 "geo_score": 7,
-                                "brand_mentionscore": 3,
+                                "mention_score": 17,
+                                "mention_count": 7,
                                 "logo": "https://logo.clearbit.com/mercedes-benz.com"
                             },
                             {
                                 "brand": "Ford",
                                 "geo_score": 8,
-                                "brand_mentionscore": 3,
+                                "mention_score": 50,
+                                "mention_count": 8,
                                 "logo": "https://logo.clearbit.com/ford.com"
                             },
                             {
                                 "brand": "Hyundai",
                                 "geo_score": 10,
-                                "brand_mentionscore": 4,
+                                "mention_score": 67,
+                                "mention_count": 10,
                                 "logo": "https://logo.clearbit.com/hyundai.com"
                             },
                             {
                                 "brand": "Tesla",
                                 "geo_score": 18,
-                                "brand_mentionscore": 6,
+                                "mention_score": 83,
+                                "mention_count": 18,
                                 "logo": "https://logo.clearbit.com/tesla.com"
                             }
                         ],
@@ -84,81 +90,23 @@
                         "EV"
                     ],
                     "rows": [
-                        [
-                            "Enphase",
-                            7,
-                            0,
-                            0
-                        ],
-                        [
-                            "Mercedes-Benz",
-                            0,
-                            3,
-                            4
-                        ],
-                        [
-                            "Ford",
-                            0,
-                            5,
-                            3
-                        ],
-                        [
-                            "Hyundai",
-                            0,
-                            3,
-                            7
-                        ],
-                        [
-                            "Lucid",
-                            0,
-                            0,
-                            6
-                        ],
-                        [
-                            "Tesla",
-                            9,
-                            3,
-                            6
-                        ]
+                        ["Enphase", 7, 0, 0],
+                        ["Mercedes-Benz", 0, 3, 4],
+                        ["Ford", 0, 5, 3],
+                        ["Hyundai", 0, 3, 7],
+                        ["Lucid", 0, 0, 6],
+                        ["Tesla", 9, 3, 6]
                     ]
                 },
                 "competitor_sentiment_table": {
-                    "header": [
-                        "Brand",
-                        "Sentiment Summary",
-                        "overall outlook"
-                    ],
+                    "header": ["Brand", "Sentiment Summary", "overall outlook"],
                     "rows": [
-                        [
-                            "Enphase",
-                            "Niche visibility as a key player in home energy storage, but absent in broader EV and autonomous driving conversations.",
-                            "Neutral"
-                        ],
-                        [
-                            "Mercedes-Benz",
-                            "Strong visibility as a leader in Level 3 autonomous driving and a top contender in the luxury long-range EV market.",
-                            "Positive"
-                        ],
-                        [
-                            "Ford",
-                            "Operational visibility with a strong presence in hands-free driving (BlueCruise) and affordable EV categories.",
-                            "Positive"
-                        ],
-                        [
-                            "Hyundai",
-                            "Strong and growing visibility, particularly in affordable EV and advanced driver-assistance systems (ADAS) categories.",
-                            "Positive"
-                        ],
-                        [
-                            "Lucid",
-                            "Niche powerhouse, positioned as a direct competitor to Tesla at the highest end of the long-range EV market.",
-                            "Neutral"
-                        ],
-                        [
-                            "Tesla",
-                            "Leader and benchmark in AI-surfaced results for core EV and energy storage topics, consistently holding top-tier rankings.",
-                            "Positive"
-                        ]
+                        ["Enphase", "Niche visibility as a key player in home energy storage, but absent in broader EV and autonomous driving conversations.", "Neutral"],
+                        ["Mercedes-Benz", "Strong visibility as a leader in Level 3 autonomous driving and a top contender in the luxury long-range EV market.", "Positive"],
+                        ["Ford", "Operational visibility with a strong presence in hands-free driving (BlueCruise) and affordable EV categories.", "Positive"],
+                        ["Hyundai", "Strong and growing visibility, particularly in affordable EV and advanced driver-assistance systems (ADAS) categories.", "Positive"],
+                        ["Lucid", "Niche powerhouse, positioned as a direct competitor to Tesla at the highest end of the long-range EV market.", "Neutral"],
+                        ["Tesla", "Leader and benchmark in AI-surfaced results for core EV and energy storage topics, consistently holding top-tier rankings.", "Positive"]
                     ]
                 },
                 "brand_mentions": {
@@ -191,111 +139,31 @@
                 "sources_and_content_impact": {
                     "header": [
                         "Sources",
-                        "Enphase",
-                        "Enphase Mentions",
-                        "Enphase Mention Score",
-                        "Mercedes-Benz",
-                        "Mercedes-Benz Mentions",
-                        "Mercedes-Benz Mention Score",
-                        "Ford",
-                        "Ford Mentions",
-                        "Ford Mention Score",
-                        "Hyundai",
-                        "Hyundai Mentions",
-                        "Hyundai Mention Score",
-                        "Lucid",
-                        "Lucid Mentions",
-                        "Lucid Mention Score",
-                        "Tesla",
-                        "Tesla Mentions",
-                        "Tesla Mention Score"
+                        "Enphase", "Enphase Mentions", "Enphase Mention Score",
+                        "Mercedes-Benz", "Mercedes-Benz Mentions", "Mercedes-Benz Mention Score",
+                        "Ford", "Ford Mentions", "Ford Mention Score",
+                        "Hyundai", "Hyundai Mentions", "Hyundai Mention Score",
+                        "Lucid", "Lucid Mentions", "Lucid Mention Score",
+                        "Tesla", "Tesla Mentions", "Tesla Mention Score"
                     ],
                     "rows": [
-                        [
-                            "Automotive Media",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Present",
-                            3,
-                            "Low",
-                            "Present",
-                            3,
-                            "Low",
-                            "Present",
-                            3,
-                            "Low",
-                            "Present",
-                            2,
-                            "Low",
-                            "Present",
-                            3,
-                            "Low"
-                        ],
-                        [
-                            "Energy & Solar Review Sites",
-                            "Present",
-                            3,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Present",
-                            3,
-                            "Low"
-                        ],
-                        [
-                            "Tech News",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Present",
-                            1,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low",
-                            "Absent",
-                            0,
-                            "Low"
-                        ]
+                        ["Automotive Media", "Absent", 0, "Low", "Present", 3, "Low", "Present", 3, "Low", "Present", 3, "Low", "Present", 2, "Low", "Present", 3, "Low"],
+                        ["Energy & Solar Review Sites", "Present", 3, "Low", "Absent", 0, "Low", "Absent", 0, "Low", "Absent", 0, "Low", "Absent", 0, "Low", "Present", 3, "Low"],
+                        ["Tech News", "Absent", 0, "Low", "Absent", 0, "Low", "Absent", 0, "Low", "Present", 1, "Low", "Absent", 0, "Low", "Absent", 0, "Low"]
                     ],
                     "depth_notes": {
                         "Tesla": {
                             "Automotive Media": {
                                 "insight": "Frequently positioned as a top-tier long-range EV, especially the Model S, in direct comparison with luxury and performance brands.",
-                                "pages_used": [
-                                    "Longest Range EV Guides 2025",
-                                    "Best Self-Driving Car Reviews"
-                                ]
+                                "pages_used": ["Longest Range EV Guides 2025", "Best Self-Driving Car Reviews"]
                             },
                             "Energy & Solar Review Sites": {
                                 "insight": "Consistently ranked as a leading home energy storage solution with the Powerwall, praised for its capacity and integration.",
-                                "pages_used": [
-                                    "Best Home Batteries 2025",
-                                    "Affordable Energy Storage Systems 2023"
-                                ]
+                                "pages_used": ["Best Home Batteries 2025", "Affordable Energy Storage Systems 2023"]
                             },
                             "Tech News": {
                                 "insight": "Mentioned in the context of home energy backup systems, but less frequently than in specialized automotive or energy media.",
-                                "pages_used": [
-                                    "Home Battery Backup System Guides"
-                                ]
+                                "pages_used": ["Home Battery Backup System Guides"]
                             }
                         }
                     }
@@ -345,35 +213,15 @@
                         "Limited presence in broader tech media, with visibility concentrated in specialized automotive and energy review sites."
                     ],
                     "competitor_positioning": {
-                        "leaders": [
-                            {
-                                "name": "Tesla (GEO 18)",
-                                "summary": "The clear leader, setting the benchmark in core categories."
-                            }
-                        ],
+                        "leaders": [{"name": "Tesla (GEO 18)", "summary": "The clear leader, setting the benchmark in core categories."}],
                         "mid_tier": [
-                            {
-                                "name": "Hyundai (GEO 10)",
-                                "summary": "A strong challenger, leading in affordable EV and ADAS queries."
-                            },
-                            {
-                                "name": "Ford (GEO 8)",
-                                "summary": "Visible for its hands-free driving tech and growing EV presence."
-                            }
+                            {"name": "Hyundai (GEO 10)", "summary": "A strong challenger, leading in affordable EV and ADAS queries."},
+                            {"name": "Ford (GEO 8)", "summary": "Visible for its hands-free driving tech and growing EV presence."}
                         ],
                         "laggards": [
-                            {
-                                "name": "Mercedes-Benz (GEO 7)",
-                                "summary": "A niche leader in luxury EV and Level 3 autonomy."
-                            },
-                            {
-                                "name": "Enphase (GEO 7)",
-                                "summary": "A niche leader, but only visible in the energy storage vertical."
-                            },
-                            {
-                                "name": "Lucid (GEO 6)",
-                                "summary": "A direct high-end competitor but with narrower visibility."
-                            }
+                            {"name": "Mercedes-Benz (GEO 7)", "summary": "A niche leader in luxury EV and Level 3 autonomy."},
+                            {"name": "Enphase (GEO 7)", "summary": "A niche leader, but only visible in the energy storage vertical."},
+                            {"name": "Lucid (GEO 6)", "summary": "A direct high-end competitor but with narrower visibility."}
                         ]
                     },
                     "prioritized_actions": [
