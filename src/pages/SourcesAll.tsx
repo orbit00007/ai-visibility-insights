@@ -30,7 +30,7 @@ const SourcesAll = () => {
 
   // Sort brand info by mention count for expanded view
   const sortedBrandInfo = useMemo(() => {
-    return [...brandInfo].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));
+    return [...brandInfo].sort((a, b) => b.mention_count - a.mention_count);
   }, [brandInfo]);
 
   return (

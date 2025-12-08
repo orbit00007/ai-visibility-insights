@@ -30,11 +30,21 @@ export const getKeywords = (): string[] => {
 export const getBrandInfoWithLogos = (): Array<{
   brand: string;
   geo_score: number;
-  brand_mentionscore: number;
+  mention_score: number;
+  mention_count: number;
   logo: string;
 }> => {
   const analytics = getAnalytics();
-  return analytics?.ai_visibility?.percentile_trace?.sorted_brand_info || [];
+  const sortedBrandInfo = analytics?.ai_visibility?.percentile_trace?.sorted_brand_info || [];
+  
+  // Map the data to ensure consistent field names
+  return sortedBrandInfo.map((brand: any) => ({
+    brand: brand.brand,
+    geo_score: brand.geo_score,
+    mention_score: brand.mention_score ?? brand.brand_mentionscore ?? 0,
+    mention_count: brand.mention_count ?? 0,
+    logo: brand.logo || ''
+  }));
 };
 
 // Get logo for a specific brand
